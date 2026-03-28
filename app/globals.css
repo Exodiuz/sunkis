@@ -1,23 +1,65 @@
+/* Global stilar för Sunkis — mörkt, ruffigt, folkligt */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* CSS-variabler för Sunkis färgpalett */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg:        #1a1a18;
+  --color-surface:   #2c2c2a;
+  --color-amber:     #EF9F27;
+  --color-accent:    #BA7517;
+  --color-muted:     #888780;
+  --color-light:     #F1EFE8;
+  --color-green:     #4ade80;
+  --color-red:       #f87171;
+  --color-yellow:    #facc15;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Bakgrund och textfärg för hela sidan */
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-light);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Leaflet-karta — behöver explicit höjd för att visas */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  background: var(--color-bg);
+}
+
+/* Mörkt tema för Leaflet-popups */
+.leaflet-popup-content-wrapper {
+  background: var(--color-surface) !important;
+  color: var(--color-light) !important;
+  border: 1px solid #3a3a38 !important;
+  border-radius: 8px !important;
+}
+.leaflet-popup-tip {
+  background: var(--color-surface) !important;
+}
+
+/* Anpassad scrollbar för mörkt tema */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface);
+  border-radius: 3px;
+}
+
+/* Animering för happy hour-badge */
+@keyframes pulse-amber {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.animate-pulse-amber {
+  animation: pulse-amber 2s ease-in-out infinite;
 }
 
 @layer utilities {

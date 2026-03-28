@@ -1,0 +1,111 @@
+// BarCard — ett bar-kort i rankinglistan
+// Visar rank, namn, pris, sunkfaktor och röstningsknappar
+
+'use client'
+
+import Link from 'next/link'
+import type { Bar } from '@/lib/supabase'
+import { getCurrentPrice, isHappyHourActive, formatHappyHourTime } from '@/lib/happyHour'
+import SunkFactor from './SunkFactor'
+import PriceVote from './PriceVote'
+import HappyHourBadge from './HappyHourBadge'
+
+type Props = {
+  bar: Bar
+  rank: number // placeringsnummer i listan
+}
+
+// Kontrollerar om en bar är öppen just nu baserat på öppettider
+function isOpenNow(bar: Bar): boolean | null {
+  if (!bar.opening_hours) return null
+  const now = new Date()
+  const stockholmTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Stockholm' }))
+  const dayName = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][stockholmTime.getDay()]
+  const hours = bar.opening_hours as Record<string, string>
+  return hours[dayName] ? hours[dayName] !== 'stängt' : null
+}
+
+export default function BarCard({ bar, rank }: Props) {
+  const { price, size, isHappyHour } = getCurrentPrice(bar)
+  const openNow = isOpenNow(bar)
+  const hhActive = isHappyHourActive(bar)
+  const priceUncertain = bar.price_thumbs_down >= 5
+
+  return (
+    <div className="flex flex-col bg-[#2c2c2a] rounded-xl border border-[#3a3a38] overflow-hidden hover:border-[#BA7517]/50 transition-colors">
+      <div className="flex items-stretch gap-0">
+        {/* Ranknummer — vänster kantkolumn */}
+        <div className="flex items-center justify-center w-12 bg-[#232321] flex-shrink-0">
+          <span className="text-lg font-medium text-[#888780]">#{rank}</span>
+        </div>
+
+        {/* Huvudinnehåll */}
+        <div className="flex-1 p-3 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            {/* Vänster: namn, stadsdel, öppettider */}
+            <div className="min-w-0">
+              <Link href={`/bar/${bar.id}`} className="hover:text-[#EF9F27] transition-colors">
+                <h2 className="font-medium text-[#F1EFE8] truncate">{bar.name}</h2>
+              </Link>
+
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                {/* Stadsdel */}
+                {bar.area && (
+                  <span className="text-xs text-[#888780]">{bar.area}</span>
+                )}
+
+                {/* Öppet/stängt */}
+                {openNow !== null && (
+                  <span className={`text-xs ${openNow ? 'text-[#4ade80]' : 'text-[#f87171]'}`}>
+                    {openNow ? '● Öppet' : '● Stängt'}
+                  </span>
+                )}
+
+                {/* Happy hour badge */}
+                {hhActive && <HappyHourBadge compact />}
+              </div>
+
+              {/* Happy hour-tider om de finns men inte aktiva */}
+              {bar.happy_hour_price && !hhActive && (
+                <p className="text-xs text-[#888780] mt-0.5">
+                  HH {formatHappyHourTime(bar)}: {bar.happy_hour_price} kr
+                </p>
+              )}
+            </div>
+
+            {/* Höger: pris */}
+            <div className="flex-shrink-0 text-right">
+              {price ? (
+                <>
+                  <div className={`text-2xl font-medium ${isHappyHour ? 'text-[#4ade80]' : 'text-[#EF9F27]'}`}>
+                    {price} kr
+                  </div>
+                  <div className="text-xs text-[#888780]">/ {size}</div>
+                  {/* Varning om priset är osäkert */}
+                  {priceUncertain && (
+                    <div className="text-xs text-[#facc15]" title="Många har rapporterat felaktigt pris">
+                      ⚠️ Osäkert
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-sm text-[#888780] italic">Pris saknas</div>
+              )}
+            </div>
+          </div>
+
+          {/* Botten: sunkfaktor och prisröstning */}
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#3a3a38]">
+            <SunkFactor score={bar.sunk_factor} size="sm" />
+            <PriceVote
+              barId={bar.id}
+              thumbsUp={bar.price_thumbs_up}
+              thumbsDown={bar.price_thumbs_down}
+              compact
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

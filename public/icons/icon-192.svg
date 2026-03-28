@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <!-- Bakgrund -->
+  <rect width="192" height="192" rx="28.799999999999997" fill="#1a1a18"/>
+
+  <!-- Ölglas-siluett -->
+  <g transform="translate(96, 67.19999999999999)">
+    <!-- Glaset -->
+    <path d="M-34.56 -38.400000000000006 L-26.880000000000003 28.799999999999997 L26.880000000000003 28.799999999999997 L34.56 -38.400000000000006 Z"
+      fill="none" stroke="#EF9F27" stroke-width="4.800000000000001" stroke-linejoin="round"/>
+    <!-- Skummet -->
+    <ellipse cx="0" cy="-38.400000000000006" rx="34.56" ry="9.600000000000001" fill="#EF9F27" opacity="0.8"/>
+    <!-- Handtaget -->
+    <path d="M26.880000000000003 -9.600000000000001 Q53.760000000000005 -9.600000000000001 53.760000000000005 9.600000000000001 Q53.760000000000005 23.04 26.880000000000003 23.04"
+      fill="none" stroke="#EF9F27" stroke-width="4.800000000000001"/>
+  </g>
+
+  <!-- Text: sunk -->
+  <text x="96" y="149.76"
+    font-family="Inter, Arial, sans-serif"
+    font-size="53"
+    font-weight="500"
+    fill="#EF9F27"
+    text-anchor="middle"
+    dominant-baseline="middle">sunk</text>
+
+  <!-- Text: is (ljusare) -->
+  <text x="156.95" y="149.76"
+    font-family="Inter, Arial, sans-serif"
+    font-size="53"
+    font-weight="500"
+    fill="#F5C55B"
+    text-anchor="middle"
+    dominant-baseline="middle">is</text>
+</svg>
