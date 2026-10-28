@@ -67,6 +67,19 @@ export default function AdminPage() {
     if (view !== 'login') loadBars()
   }, [view, loadBars])
 
+  // Skriver till bars via server-routen (anon-nyckeln får inte uppdatera, se D5)
+  async function adminUpdate(barId: string, update: Record<string, unknown>) {
+    const res = await fetch(`/api/admin/bars/${barId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(update),
+    })
+    if (!res.ok) {
+      alert('Kunde inte spara — logga in igen.')
+      throw new Error(`Admin-uppdatering misslyckades: ${res.status}`)
+    }
+  }
+
   // Öppnar redigeringsformuläret för en bar
   function startEdit(bar: Bar) {
     setEditingBar(bar.id)
@@ -85,20 +98,17 @@ export default function AdminPage() {
   async function saveBar(barId: string) {
     setSaving(true)
     try {
-      await supabase
-        .from('bars')
-        .update({
-          price_40cl: editForm.price_40cl ? parseInt(editForm.price_40cl) : null,
-          price_50cl: editForm.price_50cl ? parseInt(editForm.price_50cl) : null,
-          happy_hour_price: editForm.happy_hour_price ? parseInt(editForm.happy_hour_price) : null,
-          happy_hour_start: editForm.happy_hour_start || null,
-          happy_hour_end: editForm.happy_hour_end || null,
-          happy_hour_days: editForm.happy_hour_days.length > 0 ? editForm.happy_hour_days : null,
-          sunk_factor: parseFloat(editForm.sunk_factor),
-          price_verified: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', barId)
+      await adminUpdate(barId, {
+        price_40cl: editForm.price_40cl ? parseInt(editForm.price_40cl) : null,
+        price_50cl: editForm.price_50cl ? parseInt(editForm.price_50cl) : null,
+        happy_hour_price: editForm.happy_hour_price ? parseInt(editForm.happy_hour_price) : null,
+        happy_hour_start: editForm.happy_hour_start || null,
+        happy_hour_end: editForm.happy_hour_end || null,
+        happy_hour_days: editForm.happy_hour_days.length > 0 ? editForm.happy_hour_days : null,
+        sunk_factor: parseFloat(editForm.sunk_factor),
+        price_verified: true,
+        updated_at: new Date().toISOString(),
+      })
       setEditingBar(null)
       loadBars()
     } catch (e) {
@@ -110,17 +120,15 @@ export default function AdminPage() {
 
   // Nollställer prisröstningar
   async function resetVotes(barId: string) {
-    await supabase
-      .from('bars')
-      .update({ price_thumbs_up: 0, price_thumbs_down: 0, price_verified: true })
-      .eq('id', barId)
+    await adminUpdate(barId, { price_thumbs_up: 0, price_thumbs_down: 0, price_verified: true })
     loadBars()
   }
 
   // Tar bort en bar
   async function deleteBar(barId: string, name: string) {
     if (!confirm(`Ta bort "${name}"? Det går inte att ångra.`)) return
-    await supabase.from('bars').delete().eq('id', barId)
+    const res = await fetch(`/api/admin/bars/${barId}`, { method: 'DELETE' })
+    if (!res.ok) alert('Kunde inte ta bort baren — logga in igen.')
     loadBars()
   }
 

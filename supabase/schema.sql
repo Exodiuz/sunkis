@@ -1,6 +1,8 @@
 -- ══════════════════════════════════════════════════════
 -- Sunkis — Databasschema för Supabase
 -- Kör detta i: app.supabase.com → SQL Editor → Run
+-- Kör därefter alla filer i supabase/migrations/ i namnordning.
+-- Ändringar efter första versionen görs bara som nya migrationer.
 -- ══════════════════════════════════════════════════════
 
 -- Tabell: bars

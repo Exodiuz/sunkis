@@ -5,6 +5,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getDeviceId } from '@/lib/deviceId'
 
 type Props = {
   score: number        // nuvarande snittpoäng (0–5)
@@ -18,26 +19,40 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
   const [hovered, setHovered] = useState<number | null>(null)
   const [voted, setVoted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [failed, setFailed] = useState(false)
+  // Lokalt snitt och antal så UI uppdateras direkt efter röstning
+  const [localScore, setLocalScore] = useState(score)
+  const [localVotes, setLocalVotes] = useState(votes)
 
   // Roundar till närmaste 0.5 för visning
-  const displayScore = hovered ?? Math.round(score * 2) / 2
+  const displayScore = hovered ?? Math.round(localScore * 2) / 2
 
   // Storlekar baserat på prop
   const circleSize = size === 'sm' ? 'w-3 h-3' : 'w-4 h-4'
   const gap = size === 'sm' ? 'gap-0.5' : 'gap-1'
 
-  // Rösta på sunkfaktor
+  // Rösta på sunkfaktor via vote_sunk — uppdaterar snittet atomärt i databasen
   async function handleVote(value: number) {
     if (!barId || voted || loading) return
     setLoading(true)
-    try {
-      await supabase.from('sunk_votes').insert({ bar_id: barId, score: value })
+    setFailed(false)
+
+    const { data, error } = await supabase.rpc('vote_sunk', {
+      bar_id: barId,
+      score: value,
+      device_id: getDeviceId(),
+    })
+
+    if (error) {
+      console.error('Röstning misslyckades:', error)
+      setFailed(true)
+    } else {
+      const result = data as { sunk_factor: number; sunk_votes: number }
+      setLocalScore(result.sunk_factor)
+      setLocalVotes(result.sunk_votes)
       setVoted(true)
-    } catch (e) {
-      console.error('Röstning misslyckades:', e)
-    } finally {
-      setLoading(false)
     }
+    setLoading(false)
   }
 
   // Ritar 5 cirklar — fylld, halvfylld eller tom beroende på poäng
@@ -74,23 +89,26 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
         })}
 
         {/* Visa poäng som siffra bredvid cirklarna */}
-        {score > 0 && (
+        {localScore > 0 && (
           <span className="text-xs text-[#888780] ml-1">
-            {score.toFixed(1)}
+            {localScore.toFixed(1)}
           </span>
         )}
       </div>
 
       {/* Visa antal röster om angiven */}
-      {votes !== undefined && votes > 0 && (
+      {localVotes !== undefined && localVotes > 0 && (
         <span className="text-xs text-[#888780]">
-          {votes} {votes === 1 ? 'röst' : 'röster'}
+          {localVotes} {localVotes === 1 ? 'röst' : 'röster'}
         </span>
       )}
 
       {/* Bekräftelse efter röstning */}
       {voted && (
         <span className="text-xs text-[#4ade80]">Tack för din röst!</span>
+      )}
+      {failed && (
+        <span className="text-xs text-[#f87171]">Rösten kunde inte sparas. Försök igen.</span>
       )}
     </div>
   )

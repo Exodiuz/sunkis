@@ -5,6 +5,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getDeviceId } from '@/lib/deviceId'
 
 type Props = {
   barId: string
@@ -20,36 +21,30 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown, compact = false
   const [localUp, setLocalUp] = useState(thumbsUp)
   const [localDown, setLocalDown] = useState(thumbsDown)
 
-  // Skicka röst till price_votes-tabellen
+  const [failed, setFailed] = useState(false)
+
+  // Skicka röst via vote_price — sparar rösten och räknar upp atomärt i databasen
   async function vote(type: 'up' | 'down') {
     if (voted || loading) return
     setLoading(true)
+    setFailed(false)
 
-    try {
-      // Spara rösten
-      await supabase.from('price_votes').insert({ bar_id: barId, vote: type })
+    const { data, error } = await supabase.rpc('vote_price', {
+      bar_id: barId,
+      vote: type,
+      device_id: getDeviceId(),
+    })
 
-      // Uppdatera räknaren i bars-tabellen via RPC eller direkt update
-      if (type === 'up') {
-        await supabase
-          .from('bars')
-          .update({ price_thumbs_up: localUp + 1 })
-          .eq('id', barId)
-        setLocalUp(prev => prev + 1)
-      } else {
-        await supabase
-          .from('bars')
-          .update({ price_thumbs_down: localDown + 1 })
-          .eq('id', barId)
-        setLocalDown(prev => prev + 1)
-      }
-
+    if (error) {
+      console.error('Röstning misslyckades:', error)
+      setFailed(true)
+    } else {
+      const counts = data as { price_thumbs_up: number; price_thumbs_down: number }
+      setLocalUp(counts.price_thumbs_up)
+      setLocalDown(counts.price_thumbs_down)
       setVoted(true)
-    } catch (e) {
-      console.error('Röstning misslyckades:', e)
-    } finally {
-      setLoading(false)
     }
+    setLoading(false)
   }
 
   // Visa varningsikon om för många thumbs down
@@ -129,6 +124,9 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown, compact = false
 
       {voted && (
         <p className="text-sm text-[#4ade80]">Tack för din röst! Det hjälper andra.</p>
+      )}
+      {failed && (
+        <p className="text-sm text-[#f87171]">Rösten kunde inte sparas. Försök igen.</p>
       )}
     </div>
   )
