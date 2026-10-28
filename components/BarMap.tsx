@@ -5,15 +5,15 @@
 
 import { useEffect, useRef } from 'react'
 import type { Bar } from '@/lib/supabase'
-import { getCurrentPrice } from '@/lib/happyHour'
+import { getCurrentPrice, getComparablePrice, formatSize } from '@/lib/happyHour'
 
 type Props = {
   bars: Bar[]
 }
 
-// Väljer pin-färg baserat på pris
+// Väljer pin-färg baserat på pris per 40 cl
 function getPinColor(bar: Bar): string {
-  const { price } = getCurrentPrice(bar)
+  const price = getComparablePrice(bar)
   if (!price) return '#888780'      // grå = pris saknas
   if (price < 35) return '#4ade80'  // grön = under 35 kr
   if (price <= 55) return '#facc15' // gul = 35–55 kr
@@ -92,7 +92,7 @@ export default function BarMap({ bars }: Props) {
             <div style="margin-top: 8px;">
               ${price
                 ? `<span style="color: ${isHappyHour ? '#4ade80' : '#EF9F27'}; font-size: 20px; font-weight: 500;">${price} kr</span>
-                   <span style="color: #888780; font-size: 12px;"> / ${size}</span>`
+                   <span style="color: #888780; font-size: 12px;"> · ${formatSize(size)}</span>`
                 : '<span style="color: #888780; font-size: 13px; font-style: italic;">Pris saknas</span>'
               }
               ${isHappyHour ? '<div style="color: #4ade80; font-size: 12px; margin-top: 2px;">⚡ Happy hour just nu!</div>' : ''}

@@ -5,7 +5,7 @@
 
 import Link from 'next/link'
 import type { Bar } from '@/lib/supabase'
-import { getCurrentPrice, isHappyHourActive, formatHappyHourTime } from '@/lib/happyHour'
+import { getCurrentPrice, isHappyHourActive, formatHappyHourTime, formatSize } from '@/lib/happyHour'
 import SunkFactor from './SunkFactor'
 import PriceVote from './PriceVote'
 import HappyHourBadge from './HappyHourBadge'
@@ -18,8 +18,8 @@ type Props = {
 }
 
 export default function BarCard({ bar, rank, now }: Props) {
-  const { price, size, isHappyHour } = getCurrentPrice(bar)
-  const hhActive = isHappyHourActive(bar)
+  const { price, size, isHappyHour } = getCurrentPrice(bar, now)
+  const hhActive = isHappyHourActive(bar, now)
   const priceUncertain = bar.price_thumbs_down >= 5
 
   return (
@@ -55,7 +55,7 @@ export default function BarCard({ bar, rank, now }: Props) {
               {/* Happy hour-tider om de finns men inte aktiva */}
               {bar.happy_hour_price && !hhActive && (
                 <p className="text-xs text-[#888780] mt-0.5">
-                  HH {formatHappyHourTime(bar)}: {bar.happy_hour_price} kr
+                  HH {formatHappyHourTime(bar)}: {bar.happy_hour_price} kr · {formatSize(bar.happy_hour_size || '40cl')}
                 </p>
               )}
             </div>
@@ -64,10 +64,12 @@ export default function BarCard({ bar, rank, now }: Props) {
             <div className="flex-shrink-0 text-right">
               {price ? (
                 <>
-                  <div className={`text-2xl font-medium ${isHappyHour ? 'text-[#4ade80]' : 'text-[#EF9F27]'}`}>
-                    {price} kr
+                  <div className="whitespace-nowrap">
+                    <span className={`text-2xl font-medium ${isHappyHour ? 'text-[#4ade80]' : 'text-[#EF9F27]'}`}>
+                      {price} kr
+                    </span>
+                    <span className="text-xs text-[#888780]"> · {formatSize(size)}</span>
                   </div>
-                  <div className="text-xs text-[#888780]">/ {size}</div>
                   {/* Varning om priset är osäkert */}
                   {priceUncertain && (
                     <div className="text-xs text-[#facc15]" title="Många har rapporterat felaktigt pris">

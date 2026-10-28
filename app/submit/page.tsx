@@ -26,6 +26,7 @@ export default function SubmitPage() {
   const [price40, setPrice40] = useState('')
   const [price50, setPrice50] = useState('')
   const [hhPrice, setHhPrice] = useState('')
+  const [hhSize, setHhSize] = useState('40cl')
   const [hhStart, setHhStart] = useState('')
   const [hhEnd, setHhEnd] = useState('')
   const [hhDays, setHhDays] = useState<string[]>([])
@@ -62,6 +63,7 @@ export default function SubmitPage() {
         price_40cl: price40 ? parseInt(price40) : null,
         price_50cl: price50 ? parseInt(price50) : null,
         happy_hour_price: hhPrice ? parseInt(hhPrice) : null,
+        happy_hour_size: hhSize,
         happy_hour_start: hhStart || null,
         happy_hour_end: hhEnd || null,
         happy_hour_days: hhDays.length > 0 ? hhDays : null,
@@ -204,17 +206,31 @@ export default function SubmitPage() {
           <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-4">
             <h2 className="text-sm font-medium text-[#888780] uppercase tracking-wide">Happy hour (valfritt)</h2>
 
-            <div>
-              <label className="block text-sm text-[#888780] mb-1">Happy hour-pris (kr)</label>
-              <input
-                type="number"
-                value={hhPrice}
-                onChange={e => setHhPrice(e.target.value)}
-                placeholder="t.ex. 25"
-                min="1"
-                max="999"
-                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#888780] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm text-[#888780] mb-1">Happy hour-pris (kr)</label>
+                <input
+                  type="number"
+                  value={hhPrice}
+                  onChange={e => setHhPrice(e.target.value)}
+                  placeholder="t.ex. 25"
+                  min="1"
+                  max="999"
+                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#888780] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-[#888780] mb-1">Storlek</label>
+                <select
+                  value={hhSize}
+                  onChange={e => setHhSize(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                >
+                  <option value="33cl">33 cl</option>
+                  <option value="40cl">40 cl</option>
+                  <option value="50cl">50 cl</option>
+                </select>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">

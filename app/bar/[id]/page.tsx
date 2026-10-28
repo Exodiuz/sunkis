@@ -9,6 +9,7 @@ import {
   isHappyHourActive,
   formatHappyHourTime,
   formatHappyHourDays,
+  formatSize,
 } from '@/lib/happyHour'
 import SunkFactor from '@/components/SunkFactor'
 import PriceVote from '@/components/PriceVote'
@@ -125,14 +126,14 @@ export default async function BarPage({ params }: Props) {
             {bar.price_40cl && (
               <div>
                 <div className="text-3xl font-medium text-[#EF9F27]">{bar.price_40cl} kr</div>
-                <div className="text-xs text-[#888780]">40cl</div>
+                <div className="text-xs text-[#888780]">40 cl</div>
               </div>
             )}
             {/* 50cl */}
             {bar.price_50cl && (
               <div>
                 <div className="text-3xl font-medium text-[#EF9F27]">{bar.price_50cl} kr</div>
-                <div className="text-xs text-[#888780]">50cl</div>
+                <div className="text-xs text-[#888780]">50 cl</div>
               </div>
             )}
             {/* Happy hour */}
@@ -142,7 +143,7 @@ export default async function BarPage({ params }: Props) {
                   {bar.happy_hour_price} kr
                 </div>
                 <div className="text-xs text-[#888780]">
-                  Happy hour {formatHappyHourTime(bar)}
+                  {formatSize(bar.happy_hour_size || '40cl')} · Happy hour {formatHappyHourTime(bar)}
                 </div>
               </div>
             )}

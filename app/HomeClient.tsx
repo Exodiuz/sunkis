@@ -6,7 +6,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import type { Bar } from '@/lib/supabase'
-import { isHappyHourActive, getCurrentPrice } from '@/lib/happyHour'
+import { isHappyHourActive, getComparablePrice } from '@/lib/happyHour'
 import { getOpenStatus } from '@/lib/openingHours'
 import { useNow } from '@/lib/useNow'
 import FilterPills, { type Filter } from '@/components/FilterPills'
@@ -35,7 +35,7 @@ export default function HomeClient({ bars, renderedAt }: Props) {
         result = result.filter(b => getOpenStatus(b, now).isOpen)
         break
       case 'happy-hour-nu':
-        result = result.filter(isHappyHourActive)
+        result = result.filter(b => isHappyHourActive(b, now))
         break
       case 'Södermalm':
       case 'Kungsholmen':
@@ -54,20 +54,20 @@ export default function HomeClient({ bars, renderedAt }: Props) {
       )
     }
 
-    // Sortera: barer med pris (billigast först), sedan barer utan pris
+    // Sortera på pris per 40 cl (billigast först), sedan barer utan pris
     return result.sort((a, b) => {
-      const { price: priceA } = getCurrentPrice(a)
-      const { price: priceB } = getCurrentPrice(b)
-      if (!priceA && !priceB) return 0
-      if (!priceA) return 1
-      if (!priceB) return -1
+      const priceA = getComparablePrice(a, now)
+      const priceB = getComparablePrice(b, now)
+      if (priceA === null && priceB === null) return 0
+      if (priceA === null) return 1
+      if (priceB === null) return -1
       return priceA - priceB
     })
   }, [bars, activeFilter, search, now])
 
   // Dela upp i "med pris" och "utan pris" för visning
-  const withPrice = filteredBars.filter(b => getCurrentPrice(b).price !== null)
-  const withoutPrice = filteredBars.filter(b => getCurrentPrice(b).price === null)
+  const withPrice = filteredBars.filter(b => getComparablePrice(b, now) !== null)
+  const withoutPrice = filteredBars.filter(b => getComparablePrice(b, now) === null)
 
   return (
     <div className="min-h-screen bg-[#1a1a18]">

@@ -23,6 +23,7 @@ export type Bar = {
   happy_hour_start: string | null  // t.ex. "15:00"
   happy_hour_end: string | null    // t.ex. "18:00"
   happy_hour_days: string[] | null // t.ex. ["monday","tuesday"]
+  happy_hour_size: string | null   // "33cl" | "40cl" | "50cl"
   sunk_factor: number
   sunk_votes: number
   price_verified: boolean
