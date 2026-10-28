@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#1A1A18"/>
+  <!-- Flyttad 12 px åt vänster så att glas + handtag hamnar i mitten -->
+  <g transform="translate(-12 0)">
+  <!-- Handtag -->
+  <path d="M304 236 H354 Q372 236 372 254 V302 Q372 320 354 320 H300"
+    fill="none" stroke="#FF3D8B" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Glaset -->
+  <path d="M160 196 H312 L300 368 Q299 384 283 384 H189 Q173 384 172 368 Z" fill="#FF3D8B"/>
+  <!-- Bubblor -->
+  <circle cx="214" cy="300" r="11" fill="#1A1A18" opacity="0.35"/>
+  <circle cx="254" cy="262" r="8" fill="#1A1A18" opacity="0.35"/>
+  <circle cx="266" cy="334" r="13" fill="#1A1A18" opacity="0.35"/>
+  <!-- Skum -->
+  <g fill="#1FB8A6">
+    <circle cx="182" cy="190" r="32"/>
+    <circle cx="228" cy="170" r="40"/>
+    <circle cx="282" cy="174" r="37"/>
+    <circle cx="316" cy="196" r="26"/>
+    <rect x="152" y="186" width="190" height="26" rx="13"/>
+  </g>
+</g>
+</svg>

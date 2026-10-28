@@ -3,9 +3,17 @@
 
 'use client'
 
-import { useState } from 'react'
+import { ArrowLeft, Beer } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { getDeviceId } from '@/lib/deviceId'
+import { saveOwnSunkVote } from '@/lib/votes'
+import { SUNK_LEVELS } from '@/lib/sunk'
+import type { GeocodeResult } from '@/lib/geocode'
+import { distinctAreas } from '@/lib/areas'
+import { boundingBox, findDuplicates } from '@/lib/duplicates'
+import AddressSearch from '@/components/AddressSearch'
 
 // Alla veckodagar för happy hour-val
 const WEEKDAYS = [
@@ -18,11 +26,33 @@ const WEEKDAYS = [
   { value: 'sunday', label: 'Sön' },
 ]
 
+type DuplicateBar = {
+  id: string
+  name: string
+  area: string | null
+  address: string | null
+  lat: number | null
+  lng: number | null
+}
+
 export default function SubmitPage() {
   // Formulärstate
   const [name, setName] = useState('')
   const [address, setAddress] = useState('')
   const [area, setArea] = useState('')
+  const [place, setPlace] = useState<GeocodeResult | null>(null)
+  // Troliga dubbletter och om användaren bekräftat att det är en ny bar (C4)
+  const [duplicates, setDuplicates] = useState<DuplicateBar[]>([])
+  const [duplicatesConfirmed, setDuplicatesConfirmed] = useState(false)
+  const [areas, setAreas] = useState<string[]>(() => distinctAreas([]))
+
+  // Hämta områden som finns bland barerna (F3)
+  useEffect(() => {
+    supabase.from('bar_areas').select('area').then(({ data, error }) => {
+      if (error) console.error('Kunde inte hämta områden:', error)
+      else setAreas(distinctAreas((data ?? []).map(row => row.area)))
+    })
+  }, [])
   const [price40, setPrice40] = useState('')
   const [price50, setPrice50] = useState('')
   const [hhPrice, setHhPrice] = useState('')
@@ -44,9 +74,39 @@ export default function SubmitPage() {
     )
   }
 
+  // Letar efter befintliga barer med liknande namn inom 50 m (C4)
+  async function lookForDuplicates(): Promise<DuplicateBar[]> {
+    const columns = 'id, name, area, address, lat, lng'
+    const escaped = name.trim().replace(/[\\%_]/g, ch => `\\${ch}`)
+    const queries = [supabase.from('bars').select(columns).ilike('name', escaped).limit(10)]
+    if (place) {
+      const box = boundingBox(place.lat, place.lng)
+      queries.push(
+        supabase.from('bars').select(columns)
+          .gte('lat', box.minLat).lte('lat', box.maxLat)
+          .gte('lng', box.minLng).lte('lng', box.maxLng)
+          .limit(25),
+      )
+    }
+    const results = await Promise.all(queries)
+    const rows = new Map<string, DuplicateBar>()
+    for (const { data, error: queryError } of results) {
+      if (queryError) console.error('Dubblettkontroll misslyckades:', queryError)
+      for (const row of (data ?? []) as DuplicateBar[]) rows.set(row.id, row)
+    }
+    return findDuplicates(
+      { name: name.trim(), lat: place?.lat ?? null, lng: place?.lng ?? null },
+      Array.from(rows.values()),
+    )
+  }
+
   // Skickar formuläret till Supabase
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    await submit(duplicatesConfirmed)
+  }
+
+  async function submit(skipDuplicateCheck: boolean) {
     setError('')
 
     if (!name.trim()) {
@@ -56,10 +116,22 @@ export default function SubmitPage() {
 
     setLoading(true)
     try {
-      const { error: dbError } = await supabase.from('bars').insert({
+      // Dubblettkontroll (C4) — hoppas över när användaren sagt att det är en ny bar
+      if (!skipDuplicateCheck) {
+        const found = await lookForDuplicates()
+        if (found.length > 0) {
+          setDuplicates(found)
+          return
+        }
+      }
+
+      const { data: inserted, error: dbError } = await supabase.from('bars').insert({
         name: name.trim(),
         address: address.trim() || null,
         area: area || null,
+        lat: place?.lat ?? null,
+        lng: place?.lng ?? null,
+        osm_id: place?.osmId ?? null,
         price_40cl: price40 ? parseInt(price40) : null,
         price_50cl: price50 ? parseInt(price50) : null,
         happy_hour_price: hhPrice ? parseInt(hhPrice) : null,
@@ -67,11 +139,19 @@ export default function SubmitPage() {
         happy_hour_start: hhStart || null,
         happy_hour_end: hhEnd || null,
         happy_hour_days: hhDays.length > 0 ? hhDays : null,
-        sunk_factor: sunkFactor,
         price_verified: false, // väntar på admin-verifiering
-      })
+      }).select('id').single()
 
       if (dbError) throw dbError
+
+      // Inskickarens sunkbedömning blir första rösten — snittet räknas från sunk_votes (B1)
+      const { error: voteError } = await supabase.rpc('vote_sunk', {
+        bar_id: inserted.id,
+        score: sunkFactor,
+        device_id: getDeviceId(),
+      })
+      if (voteError) console.error('Sunkröst vid inskick misslyckades:', voteError)
+      else saveOwnSunkVote(inserted.id, sunkFactor)
       setSubmitted(true)
     } catch (err) {
       console.error('Fel vid inskick:', err)
@@ -84,16 +164,16 @@ export default function SubmitPage() {
   // Tack-sida efter inskick
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#1a1a18] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-ink flex items-center justify-center px-4">
         <div className="text-center max-w-sm space-y-4">
-          <div className="text-5xl">🍺</div>
-          <h1 className="text-2xl font-medium text-[#F1EFE8]">Tack!</h1>
-          <p className="text-[#A3A199]">
+          <Beer aria-hidden="true" className="w-12 h-12 mx-auto text-brand-light" />
+          <h1 className="font-display text-2xl font-medium text-cream">Tack!</h1>
+          <p className="text-muted">
             Baren har skickats in och granskas av admin. Den syns i listan och på kartan så fort priset är verifierat.
           </p>
           <Link
             href="/"
-            className="inline-block mt-4 px-6 py-3 bg-[#BA7517] text-[#1a1a18] rounded-xl font-medium hover:bg-[#EF9F27] transition-colors"
+            className="inline-block mt-4 px-6 py-3 bg-brand text-ink rounded-xl font-medium hover:bg-brand-light transition-colors"
           >
             Tillbaka till listan
           </Link>
@@ -103,128 +183,137 @@ export default function SubmitPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1a18]">
+    <div className="min-h-screen bg-ink">
       {/* Header */}
-      <header className="bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
+      <header className="bg-ink/95 backdrop-blur-sm border-b border-surface">
         <div className="max-w-2xl mx-auto px-4 py-1 flex items-center gap-3">
-          <Link href="/" className="inline-flex items-center min-h-[44px] text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-            ← Tillbaka
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-muted hover:text-brand-light transition-colors">
+            <ArrowLeft aria-hidden="true" className="w-4 h-4 mr-1" />
+            Tillbaka
           </Link>
-          <span className="text-[#3a3a38]">/</span>
-          <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-medium">
-            <span className="text-[#EF9F27]">sunk</span>
-            <span className="text-[#F5C55B]">is</span>
+          <span className="text-line">/</span>
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-display font-bold">
+            <span className="text-brand">sunk</span>
+            <span className="text-teal">is</span>
           </Link>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-6">
-        <h1 className="text-xl font-medium text-[#F1EFE8] mb-1">Lägg till en bar</h1>
-        <p className="text-sm text-[#A3A199] mb-6">
+        <h1 className="font-display text-xl font-medium text-cream mb-1">Lägg till en bar</h1>
+        <p className="text-sm text-muted mb-6">
           Hjälp andra hitta billigt öl — fyll i vad du vet.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Grundinfo */}
-          <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-4">
-            <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Grundinfo</h2>
+          <div className="bg-surface rounded-xl p-4 space-y-4">
+            <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Grundinfo</h2>
 
             <div>
-              <label className="block text-sm text-[#A3A199] mb-1">
-                Barens namn <span className="text-[#f87171]">*</span>
+              <label htmlFor="bar-name" className="block text-sm text-muted mb-1">
+                Barens namn <span className="text-danger">*</span>
               </label>
               <input
+                id="bar-name"
                 type="text"
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={e => { setName(e.target.value); setDuplicates([]); setDuplicatesConfirmed(false) }}
                 placeholder="t.ex. The International Bar"
-                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream placeholder-muted text-sm focus:border-brand transition-colors"
               />
             </div>
 
-            <div>
-              <label className="block text-sm text-[#A3A199] mb-1">Adress</label>
-              <input
-                type="text"
-                value={address}
-                onChange={e => setAddress(e.target.value)}
-                placeholder="t.ex. Folkungagatan 84"
-                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
-              />
-            </div>
+            {/* Adress med platssökning — sparar koordinater och osm-id (C1) */}
+            <AddressSearch
+              value={address}
+              selected={place}
+              onChange={text => { setAddress(text); setPlace(null); setDuplicates([]); setDuplicatesConfirmed(false) }}
+              onSelect={chosen => {
+                setPlace(chosen)
+                // Visa gatuadressen utan barens namn i fältet
+                setAddress(chosen.name ? chosen.label.replace(`${chosen.name}, `, '') : chosen.label)
+                if (chosen.area) setArea(chosen.area)
+                if (!name.trim() && chosen.name) setName(chosen.name)
+              }}
+            />
 
             <div>
-              <label className="block text-sm text-[#A3A199] mb-1">Stadsdel</label>
+              <label htmlFor="bar-area" className="block text-sm text-muted mb-1">Stadsdel</label>
               <select
+                id="bar-area"
                 value={area}
                 onChange={e => setArea(e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream text-sm focus:border-brand transition-colors"
               >
                 <option value="">Välj stadsdel</option>
-                <option value="Södermalm">Södermalm</option>
-                <option value="Kungsholmen">Kungsholmen</option>
-                <option value="Vasastan">Vasastan</option>
-                <option value="Östermalm">Östermalm</option>
-                <option value="Norrmalm">Norrmalm / City</option>
+                {/* Områden från datan (F3); ett område från adressökningen läggs till om det saknas */}
+                {(area && !areas.includes(area) ? [...areas, area] : areas).map(a => (
+                  <option key={a} value={a}>{a}</option>
+                ))}
               </select>
             </div>
           </div>
 
           {/* Priser */}
-          <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-4">
-            <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Priser</h2>
+          <div className="bg-surface rounded-xl p-4 space-y-4">
+            <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Priser</h2>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm text-[#A3A199] mb-1">40cl (kr)</label>
+                <label htmlFor="price-40" className="block text-sm text-muted mb-1">40cl (kr)</label>
                 <input
+                id="price-40"
                   type="number"
                   value={price40}
                   onChange={e => setPrice40(e.target.value)}
                   placeholder="t.ex. 35"
                   min="1"
                   max="999"
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream placeholder-muted text-sm focus:border-brand transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-sm text-[#A3A199] mb-1">50cl (kr)</label>
+                <label htmlFor="price-50" className="block text-sm text-muted mb-1">50cl (kr)</label>
                 <input
+                id="price-50"
                   type="number"
                   value={price50}
                   onChange={e => setPrice50(e.target.value)}
                   placeholder="t.ex. 45"
                   min="1"
                   max="999"
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream placeholder-muted text-sm focus:border-brand transition-colors"
                 />
               </div>
             </div>
           </div>
 
           {/* Happy hour */}
-          <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-4">
-            <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Happy hour (valfritt)</h2>
+          <div className="bg-surface rounded-xl p-4 space-y-4">
+            <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Happy hour (valfritt)</h2>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm text-[#A3A199] mb-1">Happy hour-pris (kr)</label>
+                <label htmlFor="hh-price" className="block text-sm text-muted mb-1">Happy hour-pris (kr)</label>
                 <input
+                id="hh-price"
                   type="number"
                   value={hhPrice}
                   onChange={e => setHhPrice(e.target.value)}
                   placeholder="t.ex. 25"
                   min="1"
                   max="999"
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream placeholder-muted text-sm focus:border-brand transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-sm text-[#A3A199] mb-1">Storlek</label>
+                <label htmlFor="hh-size" className="block text-sm text-muted mb-1">Storlek</label>
                 <select
+                id="hh-size"
                   value={hhSize}
                   onChange={e => setHhSize(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream text-sm focus:border-brand transition-colors"
                 >
                   <option value="33cl">33 cl</option>
                   <option value="40cl">40 cl</option>
@@ -235,29 +324,31 @@ export default function SubmitPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm text-[#A3A199] mb-1">Starttid</label>
+                <label htmlFor="hh-start" className="block text-sm text-muted mb-1">Starttid</label>
                 <input
+                id="hh-start"
                   type="time"
                   value={hhStart}
                   onChange={e => setHhStart(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream text-sm focus:border-brand transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-sm text-[#A3A199] mb-1">Sluttid</label>
+                <label htmlFor="hh-end" className="block text-sm text-muted mb-1">Sluttid</label>
                 <input
+                id="hh-end"
                   type="time"
                   value={hhEnd}
                   onChange={e => setHhEnd(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream text-sm focus:border-brand transition-colors"
                 />
               </div>
             </div>
 
             {/* Dagar för happy hour */}
             <div>
-              <label className="block text-sm text-[#A3A199] mb-2">Dagar</label>
-              <div className="flex gap-2 flex-wrap">
+              <p id="hh-days-label" className="block text-sm text-muted mb-2">Dagar</p>
+              <div className="flex gap-2 flex-wrap" role="group" aria-labelledby="hh-days-label">
                 {WEEKDAYS.map(({ value, label }) => (
                   <button
                     key={value}
@@ -266,8 +357,8 @@ export default function SubmitPage() {
                     aria-pressed={hhDays.includes(value)}
                     className={`min-h-[44px] min-w-[44px] px-3 rounded-lg text-sm border transition-colors ${
                       hhDays.includes(value)
-                        ? 'bg-[#EF9F27] border-[#EF9F27] text-[#1a1a18]'
-                        : 'bg-[#1a1a18] border-[#3a3a38] text-[#A3A199]'
+                        ? 'bg-brand border-brand text-ink'
+                        : 'bg-ink border-line text-muted'
                     }`}
                   >
                     {label}
@@ -278,9 +369,11 @@ export default function SubmitPage() {
           </div>
 
           {/* Sunkfaktor */}
-          <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-3">
-            <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Sunkfaktor</h2>
-            <p className="text-xs text-[#A3A199]">Hur sunkigt är det? (1 = ganska trevligt, 5 = riktigt hak)</p>
+          <div className="bg-surface rounded-xl p-4 space-y-3">
+            <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Sunkfaktor</h2>
+            <p className="text-sm text-muted">
+              Hur sunkigt är det? <span className="text-cream">{SUNK_LEVELS[sunkFactor - 1].label}</span>
+            </p>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map(n => (
                 <button
@@ -288,11 +381,11 @@ export default function SubmitPage() {
                   type="button"
                   onClick={() => setSunkFactor(n)}
                   aria-pressed={sunkFactor === n}
-                  aria-label={`Sunkfaktor ${n} av 5`}
+                  aria-label={`Sunkfaktor ${n} av 5: ${SUNK_LEVELS[n - 1].label}`}
                   className={`w-11 h-11 rounded-full border-2 transition-all text-sm font-medium ${
                     sunkFactor >= n
-                      ? 'bg-[#EF9F27] border-[#EF9F27] text-[#1a1a18]'
-                      : 'bg-transparent border-[#3a3a38] text-[#A3A199]'
+                      ? 'bg-brand border-brand text-ink'
+                      : 'bg-transparent border-line text-muted'
                   }`}
                 >
                   {n}
@@ -301,9 +394,38 @@ export default function SubmitPage() {
             </div>
           </div>
 
+          {/* Trolig dubblett (C4) */}
+          {duplicates.length > 0 && !duplicatesConfirmed && (
+            <div role="alert" className="px-4 py-3 bg-warning/10 border border-warning/40 rounded-lg space-y-3">
+              <p className="text-sm text-cream">
+                {duplicates.length === 1 ? 'Den här baren verkar redan finnas:' : 'De här barerna verkar redan finnas:'}
+              </p>
+              <ul className="space-y-1">
+                {duplicates.map(d => (
+                  <li key={d.id}>
+                    <Link href={`/bar/${d.id}`} className="inline-flex items-center min-h-[44px] text-sm text-brand-light underline underline-offset-2">
+                      {d.name}{d.address || d.area ? ` – ${d.address ?? d.area}` : ''}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-sm text-muted">
+                Är det samma bar? Öppna den och rösta på priset i stället. Är det en annan bar kan du skicka in ändå.
+              </p>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => { setDuplicatesConfirmed(true); submit(true) }}
+                className="min-h-[44px] px-4 rounded-lg border border-line text-sm text-cream hover:border-brand"
+              >
+                Det är en annan bar – skicka in
+              </button>
+            </div>
+          )}
+
           {/* Felmeddelande */}
           {error && (
-            <div className="px-4 py-3 bg-[#f87171]/10 border border-[#f87171]/30 rounded-lg text-sm text-[#f87171]">
+            <div className="px-4 py-3 bg-danger/10 border border-danger/30 rounded-lg text-sm text-danger">
               {error}
             </div>
           )}
@@ -312,7 +434,7 @@ export default function SubmitPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-[#BA7517] hover:bg-[#EF9F27] text-[#1a1a18] rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 bg-brand hover:bg-brand-light text-ink rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Skickar...' : 'Skicka in baren'}
           </button>

@@ -3,9 +3,12 @@
 
 'use client'
 
+import { ThumbsDown, ThumbsUp, TriangleAlert } from 'lucide-react'
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getDeviceId } from '@/lib/deviceId'
+import { isAlreadyVoted } from '@/lib/votes'
+import SuggestPrice from './SuggestPrice'
 
 type Props = {
   barId: string
@@ -21,6 +24,9 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
   const [localDown, setLocalDown] = useState(thumbsDown)
 
   const [failed, setFailed] = useState(false)
+  const [alreadyVoted, setAlreadyVoted] = useState(false)
+  // Efter tumme ner frågar vi vad ölen kostar nu (C2)
+  const [votedDown, setVotedDown] = useState(false)
 
   // Skicka röst via vote_price — sparar rösten och räknar upp atomärt i databasen
   async function vote(type: 'up' | 'down') {
@@ -34,7 +40,10 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
       device_id: getDeviceId(),
     })
 
-    if (error) {
+    if (isAlreadyVoted(error)) {
+      // En röst per enhet och bar per 24 h (C3)
+      setAlreadyVoted(true)
+    } else if (error) {
       console.error('Röstning misslyckades:', error)
       setFailed(true)
     } else {
@@ -42,6 +51,7 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
       setLocalUp(counts.price_thumbs_up)
       setLocalDown(counts.price_thumbs_down)
       setVoted(true)
+      setVotedDown(type === 'down')
     }
     setLoading(false)
   }
@@ -53,13 +63,14 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <h3 className="text-sm font-medium text-[#A3A199]">Stämmer priset?</h3>
+        <h3 className="text-sm font-medium text-muted">Stämmer priset?</h3>
         {priceUncertain && (
           <span
-            className="text-sm text-[#facc15]"
+            className="text-sm text-warning"
             title={`${localDown} säger att priset inte stämmer`}
           >
-            ⚠️ Osäkert pris
+            <TriangleAlert aria-hidden="true" className="inline w-4 h-4 -mt-0.5 mr-1" />
+            Osäkert pris
           </span>
         )}
       </div>
@@ -67,34 +78,42 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
       <div className="flex gap-4">
         <button
           onClick={() => vote('up')}
-          disabled={voted || loading}
-          className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-[#2c2c2a] border border-[#3a3a38] hover:border-[#4ade80] transition-colors disabled:opacity-50"
+          disabled={voted || alreadyVoted || loading}
+          className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-surface border border-line hover:border-success transition-colors disabled:opacity-50"
         >
-          <span className="text-xl">👍</span>
+          <ThumbsUp aria-hidden="true" className="w-5 h-5 text-success" />
           <div className="text-left">
-            <div className="text-sm font-medium text-[#F1EFE8]">Ja, stämmer!</div>
-            <div className="text-xs text-[#A3A199]">{localUp} röster</div>
+            <div className="text-sm font-medium text-cream">Ja, stämmer!</div>
+            <div className="text-sm text-muted">{localUp} röster</div>
           </div>
         </button>
 
         <button
           onClick={() => vote('down')}
-          disabled={voted || loading}
-          className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-[#2c2c2a] border border-[#3a3a38] hover:border-[#f87171] transition-colors disabled:opacity-50"
+          disabled={voted || alreadyVoted || loading}
+          className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-surface border border-line hover:border-danger transition-colors disabled:opacity-50"
         >
-          <span className="text-xl">👎</span>
+          <ThumbsDown aria-hidden="true" className="w-5 h-5 text-danger" />
           <div className="text-left">
-            <div className="text-sm font-medium text-[#F1EFE8]">Nej, fel pris</div>
-            <div className="text-xs text-[#A3A199]">{localDown} röster</div>
+            <div className="text-sm font-medium text-cream">Nej, fel pris</div>
+            <div className="text-sm text-muted">{localDown} röster</div>
           </div>
         </button>
       </div>
 
       {voted && (
-        <p className="text-sm text-[#4ade80]">Tack för din röst! Det hjälper andra.</p>
+        <p className="text-sm text-success">Tack för din röst! Det hjälper andra.</p>
       )}
       {failed && (
-        <p className="text-sm text-[#f87171]">Rösten kunde inte sparas. Försök igen.</p>
+        <p className="text-sm text-danger">Rösten kunde inte sparas. Försök igen.</p>
+      )}
+      {votedDown && (
+        <div className="pt-1">
+          <SuggestPrice barId={barId} label="Vad kostar den nu?" />
+        </div>
+      )}
+      {alreadyVoted && (
+        <p className="text-sm text-muted">Du har redan röstat på priset här i dag.</p>
       )}
     </div>
   )

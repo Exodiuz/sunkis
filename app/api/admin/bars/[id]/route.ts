@@ -33,6 +33,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   for (const field of EDITABLE_FIELDS) {
     if (field in body) update[field] = body[field]
   }
+  // Verifiering räknas som bekräftelse av priset (D3)
+  if (update.price_verified === true) update.price_confirmed_at = new Date().toISOString()
+
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: 'Inget att uppdatera' }, { status: 400 })
   }

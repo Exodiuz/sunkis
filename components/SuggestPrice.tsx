@@ -46,13 +46,13 @@ export default function SuggestPrice({ barId, label = 'Vad kostar en stor stark?
   }
 
   if (sent) {
-    return <p className="text-sm text-[#4ade80]">Tack! Priset granskas innan det visas.</p>
+    return <p className="text-sm text-success">Tack! Priset granskas innan det visas.</p>
   }
 
   const inputId = `price-${barId}`
   return (
     <form onSubmit={handleSubmit} className="space-y-2">
-      <label htmlFor={inputId} className="block text-sm text-[#A3A199]">{label}</label>
+      <label htmlFor={inputId} className="block text-sm text-muted">{label}</label>
       <div className="flex gap-2">
         <input
           id={inputId}
@@ -63,27 +63,26 @@ export default function SuggestPrice({ barId, label = 'Vad kostar en stor stark?
           value={price}
           onChange={e => setPrice(e.target.value)}
           placeholder="kr"
-          className="w-24 min-h-[44px] px-3 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:border-[#BA7517]"
+          className="w-24 min-h-[44px] px-3 bg-ink border border-line rounded-lg text-cream placeholder-muted text-sm focus:border-brand"
         />
         <select
           aria-label="Storlek"
           value={size}
           onChange={e => setSize(e.target.value)}
-          className="min-h-[44px] px-3 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:border-[#BA7517]"
+          className="min-h-[44px] px-3 bg-ink border border-line rounded-lg text-cream text-sm focus:border-brand"
         >
-          <option value="33cl">33 cl</option>
           <option value="40cl">40 cl</option>
           <option value="50cl">50 cl</option>
         </select>
         <button
           type="submit"
           disabled={loading}
-          className="min-h-[44px] px-4 bg-[#BA7517] hover:bg-[#EF9F27] text-[#1a1a18] rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+          className="min-h-[44px] px-4 bg-brand hover:bg-brand-light text-ink rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
         >
           {loading ? 'Skickar...' : 'Skicka'}
         </button>
       </div>
-      {error && <p className="text-sm text-[#f87171]">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
     </form>
   )
 }

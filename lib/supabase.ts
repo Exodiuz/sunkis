@@ -7,6 +7,7 @@ import { createClient } from '@supabase/supabase-js'
 export type Bar = {
   id: string
   google_place_id: string | null
+  osm_id: string | null            // "node/123" från adressökningen (C1)
   name: string
   address: string | null
   area: string | null
@@ -31,6 +32,7 @@ export type Bar = {
   price_verified: boolean
   price_thumbs_up: number
   price_thumbs_down: number
+  price_confirmed_at: string | null // senaste bekräftelse av priset (D3)
   created_at: string
   updated_at: string
 }
