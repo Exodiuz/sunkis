@@ -78,7 +78,7 @@ export default function SuggestPrice({ barId, label = 'Vad kostar en stor stark?
         <button
           type="submit"
           disabled={loading}
-          className="min-h-[44px] px-4 bg-[#BA7517] hover:bg-[#EF9F27] text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+          className="min-h-[44px] px-4 bg-[#BA7517] hover:bg-[#EF9F27] text-[#1a1a18] rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
         >
           {loading ? 'Skickar...' : 'Skicka'}
         </button>

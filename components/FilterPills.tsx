@@ -43,7 +43,7 @@ function pillClass(selected: boolean) {
     flex-shrink-0 inline-flex items-center min-h-[44px] px-4 rounded-full text-sm font-medium
     border transition-all duration-150
     ${selected
-      ? 'bg-[#BA7517] border-[#BA7517] text-white'
+      ? 'bg-[#EF9F27] border-[#EF9F27] text-[#1a1a18]'
       : 'bg-[#2c2c2a] border-[#3a3a38] text-[#888780] hover:border-[#BA7517] hover:text-[#F1EFE8]'
     }
   `

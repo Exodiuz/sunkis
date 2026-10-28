@@ -93,7 +93,7 @@ export default function SubmitPage() {
           </p>
           <Link
             href="/"
-            className="inline-block mt-4 px-6 py-3 bg-[#BA7517] text-white rounded-xl font-medium hover:bg-[#EF9F27] transition-colors"
+            className="inline-block mt-4 px-6 py-3 bg-[#BA7517] text-[#1a1a18] rounded-xl font-medium hover:bg-[#EF9F27] transition-colors"
           >
             Tillbaka till listan
           </Link>
@@ -266,7 +266,7 @@ export default function SubmitPage() {
                     aria-pressed={hhDays.includes(value)}
                     className={`min-h-[44px] min-w-[44px] px-3 rounded-lg text-sm border transition-colors ${
                       hhDays.includes(value)
-                        ? 'bg-[#BA7517] border-[#BA7517] text-white'
+                        ? 'bg-[#EF9F27] border-[#EF9F27] text-[#1a1a18]'
                         : 'bg-[#1a1a18] border-[#3a3a38] text-[#888780]'
                     }`}
                   >
@@ -312,7 +312,7 @@ export default function SubmitPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-[#BA7517] hover:bg-[#EF9F27] text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 bg-[#BA7517] hover:bg-[#EF9F27] text-[#1a1a18] rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Skickar...' : 'Skicka in baren'}
           </button>
