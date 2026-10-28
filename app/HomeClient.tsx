@@ -177,11 +177,18 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
         {location.status === 'locating' && (nearMe || sort === 'närmast') && (
           <p className="text-sm text-[#888780]" role="status">Hämtar din position…</p>
         )}
-        {locationBlocked && (nearMe || sort === 'närmast') && (
+        {locationBlocked && (
           <p className="text-sm text-[#888780]" role="status">
             {location.status === 'denied'
               ? 'Platsåtkomst är avstängd – välj ett område ovan i stället.'
-              : 'Kunde inte hitta din position – välj ett område ovan i stället.'}
+              : 'Kunde inte hitta din position – välj ett område ovan i stället.'}{' '}
+            <button
+              type="button"
+              onClick={() => { setNearMe(true); location.request() }}
+              className="min-h-[44px] px-1 text-[#EF9F27] underline underline-offset-2"
+            >
+              Försök igen
+            </button>
           </p>
         )}
       </div>
