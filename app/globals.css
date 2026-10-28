@@ -3,6 +3,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Synlig fokusring på allt interaktivt vid tangentbordsnavigering (A5) */
+@layer base {
+  :focus-visible {
+    outline: 2px solid #F5C55B;
+    outline-offset: 2px;
+  }
+}
+
 /* CSS-variabler för Sunkis färgpalett */
 :root {
   --color-bg:        #1a1a18;

@@ -42,7 +42,7 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
             <div className="min-w-0">
               <Link
                 href={`/bar/${bar.id}`}
-                className="hover:text-[#EF9F27] transition-colors after:absolute after:inset-0 after:rounded-xl"
+                className="hover:text-[#EF9F27] transition-colors after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-[#F5C55B]"
               >
                 <h2 className="font-medium text-[#F1EFE8] truncate">{bar.name}</h2>
               </Link>

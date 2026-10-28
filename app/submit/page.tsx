@@ -157,7 +157,7 @@ export default function SubmitPage() {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="t.ex. The International Bar"
-                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:border-[#BA7517] transition-colors"
               />
             </div>
 
@@ -180,7 +180,7 @@ export default function SubmitPage() {
               <select
                 value={area}
                 onChange={e => setArea(e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:border-[#BA7517] transition-colors"
               >
                 <option value="">Välj stadsdel</option>
                 <option value="Södermalm">Södermalm</option>
@@ -206,7 +206,7 @@ export default function SubmitPage() {
                   placeholder="t.ex. 35"
                   min="1"
                   max="999"
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:border-[#BA7517] transition-colors"
                 />
               </div>
               <div>
@@ -218,7 +218,7 @@ export default function SubmitPage() {
                   placeholder="t.ex. 45"
                   min="1"
                   max="999"
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:border-[#BA7517] transition-colors"
                 />
               </div>
             </div>
@@ -238,7 +238,7 @@ export default function SubmitPage() {
                   placeholder="t.ex. 25"
                   min="1"
                   max="999"
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:border-[#BA7517] transition-colors"
                 />
               </div>
               <div>
@@ -246,7 +246,7 @@ export default function SubmitPage() {
                 <select
                   value={hhSize}
                   onChange={e => setHhSize(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:border-[#BA7517] transition-colors"
                 >
                   <option value="33cl">33 cl</option>
                   <option value="40cl">40 cl</option>
@@ -262,7 +262,7 @@ export default function SubmitPage() {
                   type="time"
                   value={hhStart}
                   onChange={e => setHhStart(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:border-[#BA7517] transition-colors"
                 />
               </div>
               <div>
@@ -271,7 +271,7 @@ export default function SubmitPage() {
                   type="time"
                   value={hhEnd}
                   onChange={e => setHhEnd(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:border-[#BA7517] transition-colors"
                 />
               </div>
             </div>

@@ -126,7 +126,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
             placeholder="Sök bar eller stadsdel..."
             value={filters.query}
             onChange={e => setFilters({ query: e.target.value })}
-            className="w-full pl-9 pr-4 py-2.5 bg-[#2c2c2a] border border-[#3a3a38] rounded-xl text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+            className="w-full pl-9 pr-4 py-2.5 bg-[#2c2c2a] border border-[#3a3a38] rounded-xl text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:border-[#BA7517] transition-colors"
           />
         </div>
 
