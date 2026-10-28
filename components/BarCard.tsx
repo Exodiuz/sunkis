@@ -13,7 +13,7 @@ import OpenStatus from './OpenStatus'
 
 type Props = {
   bar: Bar
-  rank: number // placeringsnummer i listan
+  rank?: number // placeringsnummer i listan — visas bara för barer med pris
   now: Date    // gemensam tid från listan
 }
 
@@ -25,10 +25,12 @@ export default function BarCard({ bar, rank, now }: Props) {
   return (
     <div className="flex flex-col bg-[#2c2c2a] rounded-xl border border-[#3a3a38] overflow-hidden hover:border-[#BA7517]/50 transition-colors">
       <div className="flex items-stretch gap-0">
-        {/* Ranknummer — vänster kantkolumn */}
-        <div className="flex items-center justify-center w-12 bg-[#232321] flex-shrink-0">
-          <span className="text-lg font-medium text-[#888780]">#{rank}</span>
-        </div>
+        {/* Ranknummer — vänster kantkolumn, bara för barer med pris */}
+        {rank !== undefined && price !== null && (
+          <div className="flex items-center justify-center w-12 bg-[#232321] flex-shrink-0">
+            <span className="text-lg font-medium text-[#888780]">#{rank}</span>
+          </div>
+        )}
 
         {/* Huvudinnehåll */}
         <div className="flex-1 p-3 min-w-0">
