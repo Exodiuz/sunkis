@@ -3,10 +3,10 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getDeviceId } from '@/lib/deviceId'
-import { isAlreadyVoted } from '@/lib/votes'
+import { canVoteAgain, isAlreadyVoted, readOwnSunkVote, saveOwnSunkVote, type OwnVote } from '@/lib/votes'
 
 type Props = {
   score: number        // nuvarande snittpoäng (0–5)
@@ -22,9 +22,19 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
   const [loading, setLoading] = useState(false)
   const [failed, setFailed] = useState(false)
   const [alreadyVoted, setAlreadyVoted] = useState(false)
+  const [justVoted, setJustVoted] = useState(false)
   // Lokalt snitt och antal så UI uppdateras direkt efter röstning
   const [localScore, setLocalScore] = useState(score)
   const [localVotes, setLocalVotes] = useState(votes)
+  // Användarens egen röst, läses från localStorage efter montering (B1)
+  const [ownVote, setOwnVote] = useState<OwnVote | null>(null)
+
+  useEffect(() => {
+    if (!barId) return
+    const stored = readOwnSunkVote(barId)
+    setOwnVote(stored)
+    if (!canVoteAgain(stored)) setVoted(true)
+  }, [barId])
 
   // Roundar till närmaste 0.5 för visning
   const displayScore = hovered ?? Math.round(localScore * 2) / 2
@@ -52,10 +62,13 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
       console.error('Röstning misslyckades:', error)
       setFailed(true)
     } else {
-      const result = data as { sunk_factor: number; sunk_votes: number }
+      const result = data as { sunk_factor: number; sunk_votes: number; your_score: number }
       setLocalScore(result.sunk_factor)
       setLocalVotes(result.sunk_votes)
+      saveOwnSunkVote(barId, result.your_score)
+      setOwnVote({ score: result.your_score, at: Date.now() })
       setVoted(true)
+      setJustVoted(true)
     }
     setLoading(false)
   }
@@ -122,14 +135,17 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
         </span>
       )}
 
-      {/* Bekräftelse efter röstning */}
-      {voted && (
+      {/* Användarens egen röst och bekräftelse efter röstning */}
+      {barId && ownVote && (
+        <span className="text-xs text-[#A3A199]">Din röst: {ownVote.score} av 5</span>
+      )}
+      {justVoted && (
         <span className="text-xs text-[#4ade80]">Tack för din röst!</span>
       )}
       {failed && (
         <span className="text-xs text-[#f87171]">Rösten kunde inte sparas. Försök igen.</span>
       )}
-      {alreadyVoted && (
+      {alreadyVoted && !ownVote && (
         <span className="text-xs text-[#A3A199]">Du har redan röstat här i dag.</span>
       )}
     </div>

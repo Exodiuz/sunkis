@@ -6,6 +6,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { getDeviceId } from '@/lib/deviceId'
+import { saveOwnSunkVote } from '@/lib/votes'
 
 // Alla veckodagar för happy hour-val
 const WEEKDAYS = [
@@ -56,7 +58,7 @@ export default function SubmitPage() {
 
     setLoading(true)
     try {
-      const { error: dbError } = await supabase.from('bars').insert({
+      const { data: inserted, error: dbError } = await supabase.from('bars').insert({
         name: name.trim(),
         address: address.trim() || null,
         area: area || null,
@@ -67,11 +69,19 @@ export default function SubmitPage() {
         happy_hour_start: hhStart || null,
         happy_hour_end: hhEnd || null,
         happy_hour_days: hhDays.length > 0 ? hhDays : null,
-        sunk_factor: sunkFactor,
         price_verified: false, // väntar på admin-verifiering
-      })
+      }).select('id').single()
 
       if (dbError) throw dbError
+
+      // Inskickarens sunkbedömning blir första rösten — snittet räknas från sunk_votes (B1)
+      const { error: voteError } = await supabase.rpc('vote_sunk', {
+        bar_id: inserted.id,
+        score: sunkFactor,
+        device_id: getDeviceId(),
+      })
+      if (voteError) console.error('Sunkröst vid inskick misslyckades:', voteError)
+      else saveOwnSunkVote(inserted.id, sunkFactor)
       setSubmitted(true)
     } catch (err) {
       console.error('Fel vid inskick:', err)
