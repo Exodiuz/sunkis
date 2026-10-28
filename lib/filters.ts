@@ -79,6 +79,17 @@ export function filtersToQueryString(filters: BarFilters): string {
   return qs ? `?${qs}` : ''
 }
 
+/**
+ * Som filtersToQueryString, men behåller parametrar som inte är filter (t.ex. ?bar= på kartan)
+ */
+export function mergeFiltersIntoSearch(search: string, filters: BarFilters): string {
+  const params = new URLSearchParams(search)
+  for (const key of Object.values(PARAM)) params.delete(key)
+  serializeFilters(filters).forEach((value, key) => params.set(key, value))
+  const qs = params.toString()
+  return qs ? `?${qs}` : ''
+}
+
 export function hasActiveFilters(filters: BarFilters): boolean {
   return serializeFilters(filters).toString() !== ''
 }
@@ -86,7 +97,14 @@ export function hasActiveFilters(filters: BarFilters): boolean {
 /**
  * Filtrerar barer — alla aktiva filter måste stämma (OCH)
  */
-export function applyFilters<T extends Bar>(bars: T[], filters: BarFilters, now: Date): T[] {
+// Fälten filtren läser — kartan hämtar bara dessa kolumner
+type FilterableBar = Pick<
+  Bar,
+  | 'name' | 'area' | 'opening_hours' | 'sunk_votes' | 'sunk_factor'
+  | 'price_40cl' | 'price_50cl' | 'happy_hour_price' | 'happy_hour_start' | 'happy_hour_end' | 'happy_hour_days'
+> & { happy_hour_size?: string | null }
+
+export function applyFilters<T extends FilterableBar>(bars: T[], filters: BarFilters, now: Date): T[] {
   const q = filters.query.trim().toLowerCase()
   return bars.filter(bar => {
     if (filters.openNow && !getOpenStatus(bar, now).isOpen) return false

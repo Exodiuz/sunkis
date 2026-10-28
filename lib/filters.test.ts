@@ -5,6 +5,7 @@ import {
   applyFilters,
   filtersToQueryString,
   hasActiveFilters,
+  mergeFiltersIntoSearch,
   parseFilters,
   serializeFilters,
 } from './filters'
@@ -82,5 +83,19 @@ describe('applyFilters', () => {
   it('kombinerar filter', () => {
     expect(names({ openNow: true, area: 'Vasastan' })).toEqual(['Dyr'])
     expect(names({ openNow: true, maxPrice: 40, minSunk: 3, query: 'happ' })).toEqual(['Happy'])
+  })
+})
+
+describe('mergeFiltersIntoSearch', () => {
+  it('behåller parametrar som inte är filter, som kartans ?bar=', () => {
+    const qs = mergeFiltersIntoSearch('?bar=abc&oppet=1', { ...DEFAULT_FILTERS, maxPrice: 40 })
+    const params = new URLSearchParams(qs)
+    expect(params.get('bar')).toBe('abc')
+    expect(params.get('maxpris')).toBe('40')
+    expect(params.has('oppet')).toBe(false)
+  })
+
+  it('ger tom sträng när inget finns kvar', () => {
+    expect(mergeFiltersIntoSearch('?oppet=1', DEFAULT_FILTERS)).toBe('')
   })
 })

@@ -2,6 +2,16 @@
 
 *Utredning inför K1–K4 och C1. Villkor och priser kontrollerade 2026-10-28. Länkarna står vid varje påstående.*
 
+## Status (2026-10-28)
+
+Genomfört: MapLibre GL + OpenFreeMap (mörk/ljus stil), Photon/Nominatim i `/api/geocode` och djuplänkar för vägbeskrivning. Kartsidan är omgjord för produktion:
+
+- **Alla granskade barer syns**, även de som saknar pris (grå prickar). Tidigare visades bara barer med verifierat pris, alltså 12 av 558. Ogranskade inskick från `/submit` visas fortfarande inte (D6).
+- **Prisnålar som GL-lager** i stället för HTML-markörer. Nålarna ritas på canvas med appens typsnitt (`lib/mapPins.ts`). När de krockar vinner den billigaste, och dolda barer syns som färgade prickar. Det klarar tusentals barer utan att bli segt.
+- **Kort för vald bar** i stället för popup: pris, happy hour, öppettider, avstånd, vägbeskrivning, och prisförslag direkt om priset saknas. Vald bar sparas i `?bar=`, och bar-sidan länkar dit ("Visa på kartan").
+- **Barerna i vyn som lista**, billigast först: en panel på stor skärm och ett utdrag på mobil. Det är också det tillgängliga alternativet till kartan.
+- **Samma filterpiller som listan**, en förklaring med val för barer utan pris, mörka kontroller, felruta med "Försök igen" och begränsad kartyta (Storstockholm).
+
 ## Sammanfattning
 
 **Rekommendation: MapLibre GL JS med OpenFreeMap som kartbild, Photon för adressökning (via vår egen proxy) och djuplänkar till Google Maps och Apple Maps för vägbeskrivning.**

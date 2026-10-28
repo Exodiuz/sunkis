@@ -6,6 +6,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { List, Map as MapIcon, Plus } from 'lucide-react'
+import { filtersToQueryString, parseFilters } from '@/lib/filters'
 
 const ITEMS = [
   { href: '/', label: 'Lista', icon: List, carriesFilters: true },
@@ -38,9 +39,11 @@ export default function BottomNav() {
                   aria-current={active ? 'page' : undefined}
                   onClick={e => {
                     // Ta med filtren (?oppet=1…) mellan lista och karta
-                    if (carriesFilters && onFilterPage && window.location.search) {
+                    // (bara filtren — inte t.ex. kartans ?bar=)
+                    const qs = filtersToQueryString(parseFilters(new URLSearchParams(window.location.search)))
+                    if (carriesFilters && onFilterPage && qs) {
                       e.preventDefault()
-                      router.push(`${href}${window.location.search}`)
+                      router.push(`${href}${qs}`)
                     }
                   }}
                   className={`flex flex-col items-center justify-center gap-0.5 h-full text-sm transition-colors ${
