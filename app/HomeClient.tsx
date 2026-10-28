@@ -9,8 +9,15 @@ import type { Bar } from '@/lib/supabase'
 import { isHappyHourActive, getComparablePrice } from '@/lib/happyHour'
 import { getOpenStatus } from '@/lib/openingHours'
 import { useNow } from '@/lib/useNow'
+import { distanceToBar } from '@/lib/geo'
+import { useUserLocation } from '@/lib/useUserLocation'
 import FilterPills, { type Filter } from '@/components/FilterPills'
 import BarCard from '@/components/BarCard'
+
+type Sort = 'billigast' | 'närmast'
+
+// "Nära mig" visar barer inom gångavstånd
+const NEAR_ME_RADIUS_M = 1500
 
 type Props = {
   bars: Bar[]
@@ -25,6 +32,33 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
   const [activeFilter, setActiveFilter] = useState<Filter>('alla')
   // Söktext
   const [search, setSearch] = useState('')
+  // Sortering och "Nära mig" — position hämtas först när användaren ber om det
+  const [sort, setSort] = useState<Sort>('billigast')
+  const [nearMe, setNearMe] = useState(false)
+  const location = useUserLocation()
+  const hasPosition = location.status === 'granted' && location.position !== null
+
+  // Avstånd per bar, null om position eller koordinater saknas
+  const distances = useMemo(() => {
+    const map = new Map<string, number | null>()
+    for (const bar of bars) map.set(bar.id, distanceToBar(location.position, bar))
+    return map
+  }, [bars, location.position])
+
+  function toggleNearMe() {
+    if (!nearMe && !hasPosition) location.request()
+    setNearMe(prev => !prev)
+  }
+
+  function chooseSort(next: Sort) {
+    if (next === 'närmast' && !hasPosition) location.request()
+    setSort(next)
+  }
+
+  // Positionen kan inte användas — falla tillbaka på områdesval
+  const locationBlocked = location.status === 'denied' || location.status === 'unavailable'
+  const nearMeActive = nearMe && !locationBlocked
+  const sortByDistance = sort === 'närmast' && hasPosition
 
   // Filtrering och sortering — memoizeras för prestanda
   const filteredBars = useMemo(() => {
@@ -48,6 +82,14 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
         break
     }
 
+    // Nära mig — bara barer inom gångavstånd (väntar tills positionen finns)
+    if (nearMeActive && hasPosition) {
+      result = result.filter(b => {
+        const d = distances.get(b.id)
+        return d !== null && d !== undefined && d <= NEAR_ME_RADIUS_M
+      })
+    }
+
     // Filtrera på söktext (namn eller stadsdel)
     if (search.trim()) {
       const q = search.toLowerCase()
@@ -56,9 +98,13 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
       )
     }
 
-    // Sortera på pris per 40 cl, billigast först
+    // Sortera: närmast först (barer utan koordinater sist) eller pris per 40 cl
+    if (sortByDistance) {
+      const d = (bar: Bar) => distances.get(bar.id) ?? Infinity
+      return result.sort((a, b) => d(a) - d(b))
+    }
     return result.sort((a, b) => (getComparablePrice(a, now) ?? 0) - (getComparablePrice(b, now) ?? 0))
-  }, [bars, activeFilter, search, now])
+  }, [bars, activeFilter, search, now, nearMeActive, hasPosition, sortByDistance, distances])
 
   return (
     <div className="min-h-screen bg-[#1a1a18]">
@@ -101,7 +147,43 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
         </div>
 
         {/* Filterpills */}
-        <FilterPills active={activeFilter} onChange={setActiveFilter} />
+        <FilterPills
+          active={activeFilter}
+          onChange={setActiveFilter}
+          nearMe={nearMeActive}
+          onToggleNearMe={locationBlocked ? undefined : toggleNearMe}
+        />
+
+        {/* Sortering */}
+        <div className="flex items-center gap-2" role="group" aria-label="Sortering">
+          <span className="text-sm text-[#888780]">Sortera:</span>
+          {(['billigast', 'närmast'] as const).map(option => (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={sort === option}
+              onClick={() => chooseSort(option)}
+              disabled={option === 'närmast' && locationBlocked}
+              className={`min-h-[44px] px-3 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 ${
+                sort === option ? 'text-[#F1EFE8] bg-[#2c2c2a]' : 'text-[#888780] hover:text-[#F1EFE8]'
+              }`}
+            >
+              {option === 'billigast' ? 'Billigast' : 'Närmast'}
+            </button>
+          ))}
+        </div>
+
+        {/* Statusrader för positionen */}
+        {location.status === 'locating' && (nearMe || sort === 'närmast') && (
+          <p className="text-sm text-[#888780]" role="status">Hämtar din position…</p>
+        )}
+        {locationBlocked && (nearMe || sort === 'närmast') && (
+          <p className="text-sm text-[#888780]" role="status">
+            {location.status === 'denied'
+              ? 'Platsåtkomst är avstängd – välj ett område ovan i stället.'
+              : 'Kunde inte hitta din position – välj ett område ovan i stället.'}
+          </p>
+        )}
       </div>
 
       {/* Rankinglista */}
@@ -111,9 +193,9 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
           <p className="text-xs text-[#888780]">
             {filteredBars.length} {filteredBars.length === 1 ? 'bar' : 'barer'} hittades
           </p>
-          {activeFilter !== 'alla' && (
+          {(activeFilter !== 'alla' || nearMeActive) && (
             <button
-              onClick={() => { setActiveFilter('alla'); setSearch('') }}
+              onClick={() => { setActiveFilter('alla'); setSearch(''); setNearMe(false) }}
               className="text-xs text-[#BA7517] hover:text-[#EF9F27]"
             >
               Rensa filter ×
@@ -133,7 +215,13 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
         {/* Rankade barer — bara de som har pris */}
         <div className="space-y-2">
           {filteredBars.map((bar, i) => (
-            <BarCard key={bar.id} bar={bar} rank={i + 1} now={now} />
+            <BarCard
+              key={bar.id}
+              bar={bar}
+              rank={sortByDistance ? undefined : i + 1}
+              now={now}
+              distance={distances.get(bar.id) ?? null}
+            />
           ))}
         </div>
 

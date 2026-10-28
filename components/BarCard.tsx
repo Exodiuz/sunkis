@@ -9,14 +9,16 @@ import { getCurrentPrice, isHappyHourActive, formatHappyHourTime, formatSize } f
 import SunkFactor from './SunkFactor'
 import HappyHourBadge from './HappyHourBadge'
 import OpenStatus from './OpenStatus'
+import { formatDistance } from '@/lib/geo'
 
 type Props = {
   bar: Bar
   rank?: number // placeringsnummer i listan — visas bara för barer med pris
   now: Date    // gemensam tid från listan
+  distance?: number | null // meter från användaren, om positionen är känd
 }
 
-export default function BarCard({ bar, rank, now }: Props) {
+export default function BarCard({ bar, rank, now, distance = null }: Props) {
   const { price, size, isHappyHour } = getCurrentPrice(bar, now)
   const hhActive = isHappyHourActive(bar, now)
   const priceUncertain = bar.price_thumbs_down >= 5
@@ -44,6 +46,11 @@ export default function BarCard({ bar, rank, now }: Props) {
                 {/* Stadsdel */}
                 {bar.area && (
                   <span className="text-xs text-[#888780]">{bar.area}</span>
+                )}
+
+                {/* Avstånd från användaren */}
+                {distance !== null && (
+                  <span className="text-xs text-[#888780]">{formatDistance(distance)}</span>
                 )}
 
                 {/* Öppet/stängt */}
