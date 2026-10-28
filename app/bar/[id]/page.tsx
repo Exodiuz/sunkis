@@ -16,6 +16,7 @@ import SunkFactor from '@/components/SunkFactor'
 import PriceVote from '@/components/PriceVote'
 import HappyHourBadge from '@/components/HappyHourBadge'
 import OpenStatus from '@/components/OpenStatus'
+import OpeningHours from '@/components/OpeningHours'
 import PriceFreshness from '@/components/PriceFreshness'
 import { SUNK_LEVELS } from '@/lib/sunk'
 
@@ -43,17 +44,6 @@ export async function generateMetadata({ params }: Props) {
     title: `${bar.name} — Sunkis`,
     description: `${bar.name} i ${bar.area ?? 'Stockholm'}. ${bar.price_40cl ? `40cl: ${bar.price_40cl} kr.` : ''}`,
   }
-}
-
-// Dagnamn på svenska för öppettider
-const DAY_LABELS: Record<string, string> = {
-  monday: 'Måndag',
-  tuesday: 'Tisdag',
-  wednesday: 'Onsdag',
-  thursday: 'Torsdag',
-  friday: 'Fredag',
-  saturday: 'Lördag',
-  sunday: 'Söndag',
 }
 
 export const revalidate = 300
@@ -201,16 +191,7 @@ export default async function BarPage({ params }: Props) {
         {openingHours && Object.keys(openingHours).length > 0 && (
           <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-3">
             <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Öppettider</h2>
-            <div className="space-y-1.5">
-              {Object.entries(openingHours).map(([day, hours]) => (
-                <div key={day} className="flex justify-between text-sm">
-                  <span className="text-[#A3A199]">{DAY_LABELS[day] ?? day}</span>
-                  <span className={hours === 'stängt' ? 'text-[#f87171]' : 'text-[#F1EFE8]'}>
-                    {hours}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <OpeningHours hours={openingHours} renderedAt={Date.now()} />
           </div>
         )}
 

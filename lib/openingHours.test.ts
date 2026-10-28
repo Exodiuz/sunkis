@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatOpenStatus, getOpenStatus, parseDayHours } from './openingHours'
+import { formatOpenStatus, getOpenStatus, getWeekSchedule, parseDayHours } from './openingHours'
 
 // Onsdag 28 oktober 2026 — vintertid (UTC+1)
 const winter = (time: string) => new Date(`2026-10-28T${time}:00+01:00`)
@@ -122,5 +122,20 @@ describe('formatOpenStatus', () => {
     expect(formatOpenStatus({ isOpen: false, opensAt: '15:00', opensDay: 'friday' })).toBe('Öppnar fre 15:00')
     expect(formatOpenStatus({ isOpen: false })).toBe('Stängt')
     expect(formatOpenStatus({ isOpen: false, unknown: true })).toBeNull()
+  })
+})
+
+describe('getWeekSchedule', () => {
+  it('sorterar måndag → söndag och markerar dagens rad i Stockholmstid', () => {
+    // Databasen kan ha dagarna i valfri ordning
+    const hours = { sunday: 'stängt', friday: '15:00–03:00', monday: '15:00–01:00' }
+    const week = getWeekSchedule(hours, new Date('2026-10-30T23:30:00Z')) // lördag 00:30 i Stockholm
+    expect(week.map(d => d.day)).toEqual([
+      'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+    ])
+    expect(week.find(d => d.isToday)?.day).toBe('saturday')
+    expect(week[0]).toEqual({ day: 'monday', label: 'Måndag', hours: '15:00–01:00', closed: false, isToday: false })
+    expect(week[1]).toMatchObject({ hours: 'Stängt', closed: true }) // saknas
+    expect(week[6]).toMatchObject({ hours: 'Stängt', closed: true })
   })
 })
