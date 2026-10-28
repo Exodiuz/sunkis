@@ -35,7 +35,7 @@ export default async function MissingPricesPage() {
       {/* Header */}
       <header className="bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
         <div className="max-w-2xl mx-auto px-4 py-1 flex items-center gap-3">
-          <Link href="/" className="inline-flex items-center min-h-[44px] text-[#888780] hover:text-[#EF9F27] transition-colors">
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-[#A3A199] hover:text-[#EF9F27] transition-colors">
             ← Tillbaka
           </Link>
           <span className="text-[#3a3a38]">/</span>
@@ -48,12 +48,12 @@ export default async function MissingPricesPage() {
 
       <main className="max-w-2xl mx-auto px-4 py-6">
         <h1 className="text-xl font-medium text-[#F1EFE8] mb-1">Vet du vad det kostar?</h1>
-        <p className="text-sm text-[#888780] mb-6">
+        <p className="text-sm text-[#A3A199] mb-6">
           De här barerna saknar pris. Skicka in vad en öl kostar så granskar vi det och lägger upp baren i listan.
         </p>
 
         {bars.length === 0 ? (
-          <p className="text-sm text-[#888780]">Alla barer har pris just nu. Tack!</p>
+          <p className="text-sm text-[#A3A199]">Alla barer har pris just nu. Tack!</p>
         ) : (
           <ul className="space-y-2">
             {bars.map(bar => (
@@ -62,7 +62,7 @@ export default async function MissingPricesPage() {
                   <Link href={`/bar/${bar.id}`} className="font-medium text-[#F1EFE8] hover:text-[#EF9F27] transition-colors">
                     {bar.name}
                   </Link>
-                  <p className="text-sm text-[#888780]">
+                  <p className="text-sm text-[#A3A199]">
                     {[bar.area, bar.address].filter(Boolean).join(' · ')}
                   </p>
                 </div>

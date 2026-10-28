@@ -29,7 +29,7 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
         {/* Ranknummer — vänster kantkolumn, bara för barer med pris */}
         {rank !== undefined && price !== null && (
           <div className="flex items-center justify-center w-12 bg-[#232321] flex-shrink-0">
-            <span className="text-lg font-medium text-[#888780]">#{rank}</span>
+            <span className="text-lg font-medium text-[#A3A199]">#{rank}</span>
           </div>
         )}
 
@@ -48,12 +48,12 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                 {/* Stadsdel */}
                 {bar.area && (
-                  <span className="text-xs text-[#888780]">{bar.area}</span>
+                  <span className="text-xs text-[#A3A199]">{bar.area}</span>
                 )}
 
                 {/* Avstånd från användaren */}
                 {distance !== null && (
-                  <span className="text-xs text-[#888780]">{formatDistance(distance)}</span>
+                  <span className="text-xs text-[#A3A199]">{formatDistance(distance)}</span>
                 )}
 
                 {/* Öppet/stängt */}
@@ -65,7 +65,7 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
 
               {/* Happy hour-tider om de finns men inte aktiva */}
               {bar.happy_hour_price && !hhActive && (
-                <p className="text-xs text-[#888780] mt-0.5">
+                <p className="text-xs text-[#A3A199] mt-0.5">
                   HH {formatHappyHourTime(bar)}: {bar.happy_hour_price} kr · {formatSize(bar.happy_hour_size || '40cl')}
                 </p>
               )}
@@ -79,7 +79,7 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
                     <span className={`text-2xl font-medium ${isHappyHour ? 'text-[#4ade80]' : 'text-[#EF9F27]'}`}>
                       {price} kr
                     </span>
-                    <span className="text-xs text-[#888780]"> · {formatSize(size)}</span>
+                    <span className="text-xs text-[#A3A199]"> · {formatSize(size)}</span>
                   </div>
                   {/* Varning om priset är osäkert */}
                   {priceUncertain && (
@@ -89,7 +89,7 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
                   )}
                 </>
               ) : (
-                <div className="text-sm text-[#888780] italic">Pris saknas</div>
+                <div className="text-sm text-[#A3A199] italic">Pris saknas</div>
               )}
             </div>
           </div>

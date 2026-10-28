@@ -10,7 +10,7 @@ const BarMap = dynamic(() => import('@/components/BarMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-[#2c2c2a] rounded-xl">
-      <div className="text-[#888780] text-sm">Laddar karta...</div>
+      <div className="text-[#A3A199] text-sm">Laddar karta...</div>
     </div>
   ),
 })
@@ -46,15 +46,15 @@ export default async function MapPage() {
               <span className="text-[#EF9F27]">sunk</span>
               <span className="text-[#F5C55B]">is</span>
             </Link>
-            <span className="text-[#888780] text-sm hidden sm:block">
+            <span className="text-[#A3A199] text-sm hidden sm:block">
               {bars.length} barer på kartan
             </span>
           </div>
           <div className="flex items-center gap-1 text-sm -mr-2">
-            <Link href="/" className="inline-flex items-center min-h-[44px] px-2 text-[#888780] hover:text-[#EF9F27] transition-colors">
+            <Link href="/" className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
               ☰ Lista
             </Link>
-            <Link href="/submit" className="inline-flex items-center min-h-[44px] px-2 text-[#888780] hover:text-[#EF9F27] transition-colors">
+            <Link href="/submit" className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
               + Lägg till
             </Link>
           </div>

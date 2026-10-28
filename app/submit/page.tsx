@@ -88,7 +88,7 @@ export default function SubmitPage() {
         <div className="text-center max-w-sm space-y-4">
           <div className="text-5xl">🍺</div>
           <h1 className="text-2xl font-medium text-[#F1EFE8]">Tack!</h1>
-          <p className="text-[#888780]">
+          <p className="text-[#A3A199]">
             Baren har skickats in och granskas av admin. Den syns i listan och på kartan så fort priset är verifierat.
           </p>
           <Link
@@ -107,7 +107,7 @@ export default function SubmitPage() {
       {/* Header */}
       <header className="bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
         <div className="max-w-2xl mx-auto px-4 py-1 flex items-center gap-3">
-          <Link href="/" className="inline-flex items-center min-h-[44px] text-[#888780] hover:text-[#EF9F27] transition-colors">
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-[#A3A199] hover:text-[#EF9F27] transition-colors">
             ← Tillbaka
           </Link>
           <span className="text-[#3a3a38]">/</span>
@@ -120,17 +120,17 @@ export default function SubmitPage() {
 
       <main className="max-w-2xl mx-auto px-4 py-6">
         <h1 className="text-xl font-medium text-[#F1EFE8] mb-1">Lägg till en bar</h1>
-        <p className="text-sm text-[#888780] mb-6">
+        <p className="text-sm text-[#A3A199] mb-6">
           Hjälp andra hitta billigt öl — fyll i vad du vet.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Grundinfo */}
           <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-4">
-            <h2 className="text-sm font-medium text-[#888780] uppercase tracking-wide">Grundinfo</h2>
+            <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Grundinfo</h2>
 
             <div>
-              <label className="block text-sm text-[#888780] mb-1">
+              <label className="block text-sm text-[#A3A199] mb-1">
                 Barens namn <span className="text-[#f87171]">*</span>
               </label>
               <input
@@ -138,23 +138,23 @@ export default function SubmitPage() {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="t.ex. The International Bar"
-                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#888780] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-[#888780] mb-1">Adress</label>
+              <label className="block text-sm text-[#A3A199] mb-1">Adress</label>
               <input
                 type="text"
                 value={address}
                 onChange={e => setAddress(e.target.value)}
                 placeholder="t.ex. Folkungagatan 84"
-                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#888780] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-[#888780] mb-1">Stadsdel</label>
+              <label className="block text-sm text-[#A3A199] mb-1">Stadsdel</label>
               <select
                 value={area}
                 onChange={e => setArea(e.target.value)}
@@ -172,11 +172,11 @@ export default function SubmitPage() {
 
           {/* Priser */}
           <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-4">
-            <h2 className="text-sm font-medium text-[#888780] uppercase tracking-wide">Priser</h2>
+            <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Priser</h2>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm text-[#888780] mb-1">40cl (kr)</label>
+                <label className="block text-sm text-[#A3A199] mb-1">40cl (kr)</label>
                 <input
                   type="number"
                   value={price40}
@@ -184,11 +184,11 @@ export default function SubmitPage() {
                   placeholder="t.ex. 35"
                   min="1"
                   max="999"
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#888780] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-sm text-[#888780] mb-1">50cl (kr)</label>
+                <label className="block text-sm text-[#A3A199] mb-1">50cl (kr)</label>
                 <input
                   type="number"
                   value={price50}
@@ -196,7 +196,7 @@ export default function SubmitPage() {
                   placeholder="t.ex. 45"
                   min="1"
                   max="999"
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#888780] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
                 />
               </div>
             </div>
@@ -204,11 +204,11 @@ export default function SubmitPage() {
 
           {/* Happy hour */}
           <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-4">
-            <h2 className="text-sm font-medium text-[#888780] uppercase tracking-wide">Happy hour (valfritt)</h2>
+            <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Happy hour (valfritt)</h2>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm text-[#888780] mb-1">Happy hour-pris (kr)</label>
+                <label className="block text-sm text-[#A3A199] mb-1">Happy hour-pris (kr)</label>
                 <input
                   type="number"
                   value={hhPrice}
@@ -216,11 +216,11 @@ export default function SubmitPage() {
                   placeholder="t.ex. 25"
                   min="1"
                   max="999"
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#888780] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-sm text-[#888780] mb-1">Storlek</label>
+                <label className="block text-sm text-[#A3A199] mb-1">Storlek</label>
                 <select
                   value={hhSize}
                   onChange={e => setHhSize(e.target.value)}
@@ -235,7 +235,7 @@ export default function SubmitPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm text-[#888780] mb-1">Starttid</label>
+                <label className="block text-sm text-[#A3A199] mb-1">Starttid</label>
                 <input
                   type="time"
                   value={hhStart}
@@ -244,7 +244,7 @@ export default function SubmitPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-[#888780] mb-1">Sluttid</label>
+                <label className="block text-sm text-[#A3A199] mb-1">Sluttid</label>
                 <input
                   type="time"
                   value={hhEnd}
@@ -256,7 +256,7 @@ export default function SubmitPage() {
 
             {/* Dagar för happy hour */}
             <div>
-              <label className="block text-sm text-[#888780] mb-2">Dagar</label>
+              <label className="block text-sm text-[#A3A199] mb-2">Dagar</label>
               <div className="flex gap-2 flex-wrap">
                 {WEEKDAYS.map(({ value, label }) => (
                   <button
@@ -267,7 +267,7 @@ export default function SubmitPage() {
                     className={`min-h-[44px] min-w-[44px] px-3 rounded-lg text-sm border transition-colors ${
                       hhDays.includes(value)
                         ? 'bg-[#EF9F27] border-[#EF9F27] text-[#1a1a18]'
-                        : 'bg-[#1a1a18] border-[#3a3a38] text-[#888780]'
+                        : 'bg-[#1a1a18] border-[#3a3a38] text-[#A3A199]'
                     }`}
                   >
                     {label}
@@ -279,8 +279,8 @@ export default function SubmitPage() {
 
           {/* Sunkfaktor */}
           <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-3">
-            <h2 className="text-sm font-medium text-[#888780] uppercase tracking-wide">Sunkfaktor</h2>
-            <p className="text-xs text-[#888780]">Hur sunkigt är det? (1 = ganska trevligt, 5 = riktigt hak)</p>
+            <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Sunkfaktor</h2>
+            <p className="text-xs text-[#A3A199]">Hur sunkigt är det? (1 = ganska trevligt, 5 = riktigt hak)</p>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map(n => (
                 <button
@@ -292,7 +292,7 @@ export default function SubmitPage() {
                   className={`w-11 h-11 rounded-full border-2 transition-all text-sm font-medium ${
                     sunkFactor >= n
                       ? 'bg-[#EF9F27] border-[#EF9F27] text-[#1a1a18]'
-                      : 'bg-transparent border-[#3a3a38] text-[#888780]'
+                      : 'bg-transparent border-[#3a3a38] text-[#A3A199]'
                   }`}
                 >
                   {n}

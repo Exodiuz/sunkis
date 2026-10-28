@@ -53,7 +53,7 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <h3 className="text-sm font-medium text-[#888780]">Stämmer priset?</h3>
+        <h3 className="text-sm font-medium text-[#A3A199]">Stämmer priset?</h3>
         {priceUncertain && (
           <span
             className="text-sm text-[#facc15]"
@@ -73,7 +73,7 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
           <span className="text-xl">👍</span>
           <div className="text-left">
             <div className="text-sm font-medium text-[#F1EFE8]">Ja, stämmer!</div>
-            <div className="text-xs text-[#888780]">{localUp} röster</div>
+            <div className="text-xs text-[#A3A199]">{localUp} röster</div>
           </div>
         </button>
 
@@ -85,7 +85,7 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
           <span className="text-xl">👎</span>
           <div className="text-left">
             <div className="text-sm font-medium text-[#F1EFE8]">Nej, fel pris</div>
-            <div className="text-xs text-[#888780]">{localDown} röster</div>
+            <div className="text-xs text-[#A3A199]">{localDown} röster</div>
           </div>
         </button>
       </div>

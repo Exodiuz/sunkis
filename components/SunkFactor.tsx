@@ -71,7 +71,7 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
           const circle = (
             <span className={`${circleSize} relative block rounded-full overflow-hidden`}>
               {/* Tom cirkel som bakgrund */}
-              <span className="absolute inset-0 rounded-full border border-[#888780]" />
+              <span className="absolute inset-0 rounded-full border border-[#A3A199]" />
               {/* Fylld del — täcker cirkeln baserat på fill-värdet */}
               <span
                 className="absolute inset-0 rounded-full bg-[#EF9F27]"
@@ -104,7 +104,7 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
 
         {/* Visa poäng som siffra bredvid cirklarna */}
         {localScore > 0 && (
-          <span className="text-xs text-[#888780] ml-1">
+          <span className="text-xs text-[#A3A199] ml-1">
             {localScore.toFixed(1)}
           </span>
         )}
@@ -112,7 +112,7 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
 
       {/* Visa antal röster om angiven */}
       {localVotes !== undefined && localVotes > 0 && (
-        <span className="text-xs text-[#888780]">
+        <span className="text-xs text-[#A3A199]">
           {localVotes} {localVotes === 1 ? 'röst' : 'röster'}
         </span>
       )}

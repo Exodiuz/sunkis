@@ -19,7 +19,7 @@ const config: Config = {
           surface: '#2c2c2a',
           amber:   '#EF9F27',
           accent:  '#BA7517',
-          muted:   '#888780',
+          muted:   '#A3A199',
           light:   '#F1EFE8',
         },
       },

@@ -120,15 +120,15 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
 
             {/* Navigation */}
             <nav className="flex items-center gap-1 text-sm -mr-2">
-              <Link href="/map" className="inline-flex items-center min-h-[44px] px-2 text-[#888780] hover:text-[#EF9F27] transition-colors">
+              <Link href="/map" className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
                 🗺️ Karta
               </Link>
-              <Link href="/submit" className="inline-flex items-center min-h-[44px] px-2 text-[#888780] hover:text-[#EF9F27] transition-colors">
+              <Link href="/submit" className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
                 + Lägg till
               </Link>
             </nav>
           </div>
-          <p className="text-[#888780] text-sm">Billigaste ölet i Stockholm</p>
+          <p className="text-[#A3A199] text-sm">Billigaste ölet i Stockholm</p>
         </div>
       </header>
 
@@ -136,13 +136,13 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
       <div className="max-w-2xl mx-auto px-4 pt-4 pb-2 space-y-3">
         {/* Sökruta */}
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#888780]">🔍</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A3A199]">🔍</span>
           <input
             type="text"
             placeholder="Sök bar eller stadsdel..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-[#2c2c2a] border border-[#3a3a38] rounded-xl text-[#F1EFE8] placeholder-[#888780] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
+            className="w-full pl-9 pr-4 py-2.5 bg-[#2c2c2a] border border-[#3a3a38] rounded-xl text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
           />
         </div>
 
@@ -156,7 +156,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
 
         {/* Sortering */}
         <div className="flex items-center gap-2" role="group" aria-label="Sortering">
-          <span className="text-sm text-[#888780]">Sortera:</span>
+          <span className="text-sm text-[#A3A199]">Sortera:</span>
           {(['billigast', 'närmast'] as const).map(option => (
             <button
               key={option}
@@ -165,7 +165,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
               onClick={() => chooseSort(option)}
               disabled={option === 'närmast' && locationBlocked}
               className={`min-h-[44px] px-3 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 ${
-                sort === option ? 'text-[#F1EFE8] bg-[#2c2c2a]' : 'text-[#888780] hover:text-[#F1EFE8]'
+                sort === option ? 'text-[#F1EFE8] bg-[#2c2c2a]' : 'text-[#A3A199] hover:text-[#F1EFE8]'
               }`}
             >
               {option === 'billigast' ? 'Billigast' : 'Närmast'}
@@ -175,10 +175,10 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
 
         {/* Statusrader för positionen */}
         {location.status === 'locating' && (nearMe || sort === 'närmast') && (
-          <p className="text-sm text-[#888780]" role="status">Hämtar din position…</p>
+          <p className="text-sm text-[#A3A199]" role="status">Hämtar din position…</p>
         )}
         {locationBlocked && (
-          <p className="text-sm text-[#888780]" role="status">
+          <p className="text-sm text-[#A3A199]" role="status">
             {location.status === 'denied'
               ? 'Platsåtkomst är avstängd – välj ett område ovan i stället.'
               : 'Kunde inte hitta din position – välj ett område ovan i stället.'}{' '}
@@ -197,7 +197,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
       <main className="max-w-2xl mx-auto px-4 pb-8">
         {/* Statistikrad */}
         <div className="flex items-center justify-between py-2 mb-3">
-          <p className="text-xs text-[#888780]">
+          <p className="text-xs text-[#A3A199]">
             {filteredBars.length} {filteredBars.length === 1 ? 'bar' : 'barer'} hittades
           </p>
           {(activeFilter !== 'alla' || nearMeActive) && (
@@ -212,7 +212,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
 
         {/* Inga resultat */}
         {filteredBars.length === 0 && (
-          <div className="text-center py-16 text-[#888780]">
+          <div className="text-center py-16 text-[#A3A199]">
             <div className="text-4xl mb-3">🍺</div>
             <p className="text-lg font-medium text-[#F1EFE8]">Inga barer hittades</p>
             <p className="text-sm mt-1">Prova ett annat filter eller sök på nytt</p>
@@ -236,7 +236,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
         {missingPriceCount > 0 && (
           <Link
             href="/saknar-pris"
-            className="mt-4 flex items-center justify-between gap-3 min-h-[44px] px-4 py-3 rounded-xl border border-dashed border-[#3a3a38] text-sm text-[#888780] hover:border-[#BA7517] hover:text-[#F1EFE8] transition-colors"
+            className="mt-4 flex items-center justify-between gap-3 min-h-[44px] px-4 py-3 rounded-xl border border-dashed border-[#3a3a38] text-sm text-[#A3A199] hover:border-[#BA7517] hover:text-[#F1EFE8] transition-colors"
           >
             <span>
               {missingPriceCount} {missingPriceCount === 1 ? 'bar saknar' : 'barer saknar'} pris – vet du vad det kostar?
@@ -247,9 +247,9 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
 
         {/* Uppmaning att lägga till barer */}
         <div className="mt-8 p-4 bg-[#2c2c2a] rounded-xl border border-[#3a3a38] text-center">
-          <p className="text-sm text-[#888780]">
+          <p className="text-sm text-[#A3A199]">
             Känner du till ett billigt hak?{' '}
-            <Link href="/submit" className="text-[#EF9F27] hover:underline">
+            <Link href="/submit" className="text-[#EF9F27] underline underline-offset-2">
               Lägg till det →
             </Link>
           </p>

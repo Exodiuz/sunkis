@@ -52,7 +52,7 @@ export default function SuggestPrice({ barId, label = 'Vad kostar en stor stark?
   const inputId = `price-${barId}`
   return (
     <form onSubmit={handleSubmit} className="space-y-2">
-      <label htmlFor={inputId} className="block text-sm text-[#888780]">{label}</label>
+      <label htmlFor={inputId} className="block text-sm text-[#A3A199]">{label}</label>
       <div className="flex gap-2">
         <input
           id={inputId}
@@ -63,7 +63,7 @@ export default function SuggestPrice({ barId, label = 'Vad kostar en stor stark?
           value={price}
           onChange={e => setPrice(e.target.value)}
           placeholder="kr"
-          className="w-24 min-h-[44px] px-3 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#888780] text-sm focus:border-[#BA7517]"
+          className="w-24 min-h-[44px] px-3 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:border-[#BA7517]"
         />
         <select
           aria-label="Storlek"
