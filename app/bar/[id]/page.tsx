@@ -13,6 +13,7 @@ import {
 import SunkFactor from '@/components/SunkFactor'
 import PriceVote from '@/components/PriceVote'
 import HappyHourBadge from '@/components/HappyHourBadge'
+import OpenStatus from '@/components/OpenStatus'
 
 type Props = {
   params: { id: string }
@@ -100,6 +101,7 @@ export default async function BarPage({ params }: Props) {
               <h1 className="text-2xl font-medium text-[#F1EFE8]">{bar.name}</h1>
               {bar.area && <p className="text-[#888780]">{bar.area}</p>}
               {bar.address && <p className="text-sm text-[#888780] mt-0.5">{bar.address}</p>}
+              <OpenStatus bar={bar} renderedAt={Date.now()} className="text-sm mt-1 inline-block" />
             </div>
             {/* Google-betyg om det finns */}
             {bar.google_rating && (

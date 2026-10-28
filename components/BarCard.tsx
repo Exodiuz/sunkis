@@ -9,25 +9,16 @@ import { getCurrentPrice, isHappyHourActive, formatHappyHourTime } from '@/lib/h
 import SunkFactor from './SunkFactor'
 import PriceVote from './PriceVote'
 import HappyHourBadge from './HappyHourBadge'
+import OpenStatus from './OpenStatus'
 
 type Props = {
   bar: Bar
   rank: number // placeringsnummer i listan
+  now: Date    // gemensam tid från listan
 }
 
-// Kontrollerar om en bar är öppen just nu baserat på öppettider
-function isOpenNow(bar: Bar): boolean | null {
-  if (!bar.opening_hours) return null
-  const now = new Date()
-  const stockholmTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Stockholm' }))
-  const dayName = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][stockholmTime.getDay()]
-  const hours = bar.opening_hours as Record<string, string>
-  return hours[dayName] ? hours[dayName] !== 'stängt' : null
-}
-
-export default function BarCard({ bar, rank }: Props) {
+export default function BarCard({ bar, rank, now }: Props) {
   const { price, size, isHappyHour } = getCurrentPrice(bar)
-  const openNow = isOpenNow(bar)
   const hhActive = isHappyHourActive(bar)
   const priceUncertain = bar.price_thumbs_down >= 5
 
@@ -55,11 +46,7 @@ export default function BarCard({ bar, rank }: Props) {
                 )}
 
                 {/* Öppet/stängt */}
-                {openNow !== null && (
-                  <span className={`text-xs ${openNow ? 'text-[#4ade80]' : 'text-[#f87171]'}`}>
-                    {openNow ? '● Öppet' : '● Stängt'}
-                  </span>
-                )}
+                <OpenStatus bar={bar} now={now} />
 
                 {/* Happy hour badge */}
                 {hhActive && <HappyHourBadge compact />}

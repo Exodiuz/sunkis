@@ -25,5 +25,5 @@ export const revalidate = 300
 export default async function HomePage() {
   const bars = await getBars()
 
-  return <HomeClient bars={bars} />
+  return <HomeClient bars={bars} renderedAt={Date.now()} />
 }

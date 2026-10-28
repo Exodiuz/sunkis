@@ -7,24 +7,19 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import type { Bar } from '@/lib/supabase'
 import { isHappyHourActive, getCurrentPrice } from '@/lib/happyHour'
+import { getOpenStatus } from '@/lib/openingHours'
+import { useNow } from '@/lib/useNow'
 import FilterPills, { type Filter } from '@/components/FilterPills'
 import BarCard from '@/components/BarCard'
 
 type Props = {
   bars: Bar[]
+  renderedAt: number // serverns tidsstämpel, se useNow
 }
 
-// Kontrollerar om en bar är öppen just nu
-function isOpenNow(bar: Bar): boolean {
-  if (!bar.opening_hours) return false
-  const now = new Date()
-  const stockholmTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Stockholm' }))
-  const dayName = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][stockholmTime.getDay()]
-  const hours = bar.opening_hours as Record<string, string>
-  return !!(hours[dayName] && hours[dayName] !== 'stängt')
-}
-
-export default function HomeClient({ bars }: Props) {
+export default function HomeClient({ bars, renderedAt }: Props) {
+  // Aktuell tid i Stockholm — samma värde för filter och alla kort
+  const now = useNow(renderedAt)
   // Aktivt filter
   const [activeFilter, setActiveFilter] = useState<Filter>('alla')
   // Söktext
@@ -37,7 +32,7 @@ export default function HomeClient({ bars }: Props) {
     // Filtrera på aktiv filter
     switch (activeFilter) {
       case 'öppet-nu':
-        result = result.filter(isOpenNow)
+        result = result.filter(b => getOpenStatus(b, now).isOpen)
         break
       case 'happy-hour-nu':
         result = result.filter(isHappyHourActive)
@@ -68,7 +63,7 @@ export default function HomeClient({ bars }: Props) {
       if (!priceB) return -1
       return priceA - priceB
     })
-  }, [bars, activeFilter, search])
+  }, [bars, activeFilter, search, now])
 
   // Dela upp i "med pris" och "utan pris" för visning
   const withPrice = filteredBars.filter(b => getCurrentPrice(b).price !== null)
@@ -147,7 +142,7 @@ export default function HomeClient({ bars }: Props) {
         {/* Barer med pris */}
         <div className="space-y-2">
           {withPrice.map((bar, i) => (
-            <BarCard key={bar.id} bar={bar} rank={i + 1} />
+            <BarCard key={bar.id} bar={bar} rank={i + 1} now={now} />
           ))}
         </div>
 
@@ -161,7 +156,7 @@ export default function HomeClient({ bars }: Props) {
             </div>
             <div className="space-y-2">
               {withoutPrice.map((bar, i) => (
-                <BarCard key={bar.id} bar={bar} rank={withPrice.length + i + 1} />
+                <BarCard key={bar.id} bar={bar} rank={withPrice.length + i + 1} now={now} />
               ))}
             </div>
           </div>
