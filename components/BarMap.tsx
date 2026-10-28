@@ -20,6 +20,13 @@ function getPinColor(bar: Bar): string {
   return '#f87171'                  // röd = över 55 kr
 }
 
+// Escapar text som stoppas in i popupens HTML — namn kommer från anonyma inskick
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, ch => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] as string
+  ))
+}
+
 // Skapar en SVG-pin-ikon med given färg
 function createPinIcon(color: string): string {
   return `
@@ -87,8 +94,8 @@ export default function BarMap({ bars }: Props) {
         // Popup-innehåll med bar-info
         const popupContent = `
           <div style="font-family: Inter, sans-serif; min-width: 160px;">
-            <strong style="color: #F1EFE8; font-size: 14px;">${bar.name}</strong>
-            ${bar.area ? `<div style="color: #A3A199; font-size: 12px; margin-top: 2px;">${bar.area}</div>` : ''}
+            <strong style="color: #F1EFE8; font-size: 14px;">${escapeHtml(bar.name)}</strong>
+            ${bar.area ? `<div style="color: #A3A199; font-size: 12px; margin-top: 2px;">${escapeHtml(bar.area)}</div>` : ''}
             <div style="margin-top: 8px;">
               ${price
                 ? `<span style="color: ${isHappyHour ? '#4ade80' : '#EF9F27'}; font-size: 20px; font-weight: 500;">${price} kr</span>
@@ -97,7 +104,7 @@ export default function BarMap({ bars }: Props) {
               }
               ${isHappyHour ? '<div style="color: #4ade80; font-size: 12px; margin-top: 2px;">⚡ Happy hour just nu!</div>' : ''}
             </div>
-            <a href="/bar/${bar.id}"
+            <a href="/bar/${encodeURIComponent(bar.id)}"
                style="display: inline-block; margin-top: 8px; color: #EF9F27; font-size: 12px; text-decoration: underline;">
               Visa detaljer →
             </a>
