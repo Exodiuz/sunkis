@@ -1,7 +1,7 @@
 // Bar-detaljsida — visar all information om en specifik bar
 // Server-side rendering med dynamisk route /bar/[id]
 
-import { ArrowLeft, Check, Globe, Phone } from 'lucide-react'
+import { ArrowLeft, Check, Globe, Map as MapIcon, Phone } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -97,6 +97,15 @@ export default async function BarPage({ params }: Props) {
               <h1 className="font-display text-2xl font-medium text-cream">{bar.name}</h1>
               {bar.area && <p className="text-muted">{bar.area}</p>}
               {bar.address && <p className="text-sm text-muted mt-0.5">{bar.address}</p>}
+              {bar.lat !== null && bar.lng !== null && (
+                <Link
+                  href={`/map?bar=${encodeURIComponent(bar.id)}`}
+                  className="flex w-fit items-center gap-1 min-h-[44px] text-sm text-brand-light hover:text-teal"
+                >
+                  <MapIcon aria-hidden="true" className="w-4 h-4" />
+                  Visa på kartan
+                </Link>
+              )}
               <OpenStatus bar={bar} renderedAt={Date.now()} className="text-sm mt-1 inline-block" />
             </div>
             {/* Google-betyg om det finns */}

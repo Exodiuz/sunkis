@@ -5,7 +5,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { DEFAULT_FILTERS, filtersToQueryString, parseFilters, type BarFilters } from './filters'
+import { DEFAULT_FILTERS, mergeFiltersIntoSearch, parseFilters, type BarFilters } from './filters'
 
 export function useUrlFilters() {
   const [filters, setFiltersState] = useState<BarFilters>(DEFAULT_FILTERS)
@@ -21,7 +21,7 @@ export function useUrlFilters() {
   const setFilters = useCallback((update: Partial<BarFilters> | ((prev: BarFilters) => BarFilters)) => {
     setFiltersState(prev => {
       const next = typeof update === 'function' ? update(prev) : { ...prev, ...update }
-      const url = `${window.location.pathname}${filtersToQueryString(next)}${window.location.hash}`
+      const url = `${window.location.pathname}${mergeFiltersIntoSearch(window.location.search, next)}${window.location.hash}`
       window.history.replaceState(window.history.state, '', url)
       return next
     })

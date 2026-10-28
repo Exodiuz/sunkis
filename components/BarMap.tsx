@@ -1,208 +1,267 @@
-// BarMap — MapLibre GL-karta med pins för alla barer
+// BarMap — MapLibre GL-karta med prisnålar för alla barer
 // Kartbild från OpenFreeMap (vektor, ingen API-nyckel), se docs/kartval.md
 // Laddas med next/dynamic och ssr: false eftersom MapLibre kräver window
+//
+// Barerna ritas som GL-lager, inte HTML-markörer: prisnålar där det får plats
+// (billigast vinner när de krockar), färgade prickar för resten och grå prickar
+// för barer som saknar pris. Kortet och listan för vald bar ligger i MapClient.
 
 'use client'
 
 import { useEffect, useRef } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Zap } from 'lucide-react'
-import type { Bar } from '@/lib/supabase'
 import { colors } from '@/lib/theme'
 import type { LatLng } from '@/lib/geo'
 import { DARK_MAP_BACKGROUND, MAP_STYLES, mapThemeFromDocument, type MapTheme } from '@/lib/mapStyle'
-import { getCurrentPrice, getComparablePrice, formatSize } from '@/lib/happyHour'
+import { parsePinImageId, toFeatureCollection, type Bounds, type MapBar } from '@/lib/mapBars'
+import { drawPin, TIER_COLORS } from '@/lib/mapPins'
 
 const STOCKHOLM: [number, number] = [18.0686, 59.3293] // lng, lat
+// Storstockholm — kartan går inte att dra iväg till resten av världen
+const MAX_BOUNDS: [[number, number], [number, number]] = [[17.4, 59.0], [18.8, 59.7]]
+const LOAD_TIMEOUT_MS = 15_000
+const HIT_RADIUS = 14 // px runt trycket, så att små prickar går att träffa med fingret
+// Översta lagret först — det som syns överst vinner trycket
+const HIT_LAYERS = ['bars-selected', 'bars-pins', 'bars-dots', 'bars-unpriced'] as const
+
+export type MapStatus = 'loading' | 'ready' | 'error'
 
 type Props = {
-  bars: Bar[]
-  userPosition?: LatLng | null // blå prick (K3)
-  centerRequest?: number       // ökas för att centrera kartan på userPosition
+  bars: MapBar[]
+  now: Date
+  selectedId: string | null
+  onSelect: (id: string | null) => void
+  onViewChange: (bounds: Bounds) => void
+  onStatusChange: (status: MapStatus) => void
+  focus: { id: string; seq: number } | null // flyg till en bar (från listan eller ?bar=)
+  bottomInset: number                         // px som kortet täcker längst ner
+  showUnpriced: boolean
+  userPosition?: LatLng | null                // blå prick (K3)
+  centerRequest?: number                      // ökas för att centrera kartan på userPosition
 }
 
-// Väljer pin-färg baserat på pris per 40 cl
-function getPinColor(bar: Bar): string {
-  const price = getComparablePrice(bar)
-  if (!price) return colors.muted       // grå = pris saknas
-  if (price < 35) return colors.success  // grön = under 35 kr
-  if (price <= 55) return colors.warning // gul = 35–55 kr
-  return colors.danger                   // röd = över 55 kr
+function prefersReducedMotion(): boolean {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-// Escapar text som stoppas in i popupens HTML — namn kommer från anonyma inskick
-function escapeHtml(text: string): string {
-  return text.replace(/[&<>"']/g, ch => (
-    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] as string
-  ))
+function boundsOf(map: maplibregl.Map): Bounds {
+  const b = map.getBounds()
+  return { west: b.getWest(), south: b.getSouth(), east: b.getEast(), north: b.getNorth() }
 }
 
-// Blixt (lucide Zap) som markerar happy hour i prisnålen
-const ZAP_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
-  '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>'
-
-// Prisnål "25 kr" i prisets färg, med blixt under happy hour (K2)
-function createPricePin(bar: Bar): HTMLButtonElement {
-  const { price, size, isHappyHour } = getCurrentPrice(bar)
-  const el = document.createElement('button')
-  el.type = 'button'
-  el.className = 'sunkis-price-pin'
-  el.setAttribute(
-    'aria-label',
-    price
-      ? `${bar.name}, ${price} kr för ${formatSize(size)}${isHappyHour ? ', happy hour just nu' : ''}`
-      : `${bar.name}, pris saknas`,
-  )
-  el.innerHTML = `<span class="sunkis-price-pin__label" style="background:${getPinColor(bar)}">${
-    isHappyHour ? ZAP_SVG : ''
-  }${price ? `${price} kr` : '–'}</span>`
-  return el
+function selectedFilter(id: string | null): maplibregl.FilterSpecification {
+  return ['==', ['get', 'id'], id ?? '']
 }
 
-// GeoJSON för klustringen — bara id behövs, resten slås upp i barsById
-function toGeoJSON(bars: Bar[]): GeoJSON.FeatureCollection<GeoJSON.Point, { id: string }> {
-  return {
-    type: 'FeatureCollection',
-    features: bars
-      .filter(bar => bar.lat !== null && bar.lng !== null)
-      .map(bar => ({
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: [bar.lng as number, bar.lat as number] },
-        properties: { id: bar.id },
-      })),
-  }
-}
-
-// Popup-innehåll med bar-info
-function createPopupHtml(bar: Bar): string {
-  const { price, size, isHappyHour } = getCurrentPrice(bar)
-  return `
-    <div style="font-family: var(--font-sans), sans-serif; min-width: 160px;">
-      <strong style="color: var(--color-cream); font-family: var(--font-display), sans-serif; font-size: 16px;">${escapeHtml(bar.name)}</strong>
-      ${bar.area ? `<div style="color: var(--color-muted); font-size: 14px; margin-top: 2px;">${escapeHtml(bar.area)}</div>` : ''}
-      <div style="margin-top: 8px;">
-        ${price
-          ? `<span style="color: var(${isHappyHour ? '--color-success' : '--color-brand-light'}); font-family: var(--font-mono), monospace; font-size: 20px; font-weight: 700;">${price} kr</span>
-             <span style="color: var(--color-muted); font-size: 14px;"> · ${formatSize(size)}</span>`
-          : '<span style="color: var(--color-muted); font-size: 14px; font-style: italic;">Pris saknas</span>'
-        }
-        ${isHappyHour ? '<div style="color: var(--color-success); font-size: 14px; margin-top: 2px;">Happy hour just nu!</div>' : ''}
-      </div>
-      <a href="/bar/${encodeURIComponent(bar.id)}"
-         style="display: inline-flex; align-items: center; min-height: 44px; color: var(--color-brand-light); font-size: 14px; text-decoration: underline;">
-        Visa detaljer →
-      </a>
-    </div>
-  `
-}
-
-export default function BarMap({ bars, userPosition = null, centerRequest = 0 }: Props) {
+export default function BarMap({
+  bars,
+  now,
+  selectedId,
+  onSelect,
+  onViewChange,
+  onStatusChange,
+  focus,
+  bottomInset,
+  showUnpriced,
+  userPosition = null,
+  centerRequest = 0,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
-  // Prisnålar för oklustrade barer, nycklade på bar-id
-  const markersRef = useRef<Map<string, maplibregl.Marker>>(new Map())
-  const barsByIdRef = useRef<Map<string, Bar>>(new Map())
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
+
+  // Senaste värden för händelsehanterarna, som bara registreras en gång
+  const latest = useRef({ bars, now, selectedId, showUnpriced, bottomInset, onSelect, onViewChange, onStatusChange })
+  latest.current = { bars, now, selectedId, showUnpriced, bottomInset, onSelect, onViewChange, onStatusChange }
+  const pendingFocus = useRef<{ id: string; seq: number } | null>(null)
+  const flyToBarRef = useRef<((id: string, instant?: boolean) => void) | null>(null)
+  const readyRef = useRef(false)
 
   // Skapa kartan en gång
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return
+    const container = containerRef.current
+    if (!container || mapRef.current) return
 
-    // Kartstilen följer appens tema (K4)
+    let map: maplibregl.Map
     let theme: MapTheme = mapThemeFromDocument(document.documentElement)
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: MAP_STYLES[theme],
-      center: STOCKHOLM,
-      zoom: 13,
-      attributionControl: { compact: false },
-    })
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
-    mapRef.current = map
-    const markers = markersRef.current
-
-    // Visa prisnålar för de barer som inte ingår i ett kluster just nu
-    function syncMarkers() {
-      if (!map.getSource('bars') || !map.isSourceLoaded('bars')) return
-      const visible = new Set<string>()
-      for (const feature of map.querySourceFeatures('bars')) {
-        const props = feature.properties as { id?: string; cluster?: boolean }
-        if (props.cluster || !props.id) continue
-        visible.add(props.id)
-        if (markers.has(props.id)) continue
-        const bar = barsByIdRef.current.get(props.id)
-        if (!bar) continue
-        markers.set(
-          props.id,
-          new maplibregl.Marker({ element: createPricePin(bar), anchor: 'center' })
-            .setLngLat([bar.lng as number, bar.lat as number])
-            .setPopup(new maplibregl.Popup({ offset: 24, closeButton: true }).setHTML(createPopupHtml(bar)))
-            .addTo(map),
-        )
-      }
-      markers.forEach((marker, id) => {
-        if (!visible.has(id)) {
-          marker.remove()
-          markers.delete(id)
-        }
+    try {
+      map = new maplibregl.Map({
+        container,
+        style: MAP_STYLES[theme],
+        center: STOCKHOLM,
+        zoom: 13,
+        minZoom: 9,
+        maxBounds: MAX_BOUNDS,
+        dragRotate: false,
+        pitchWithRotate: false,
+        touchPitch: false,
+        attributionControl: false, // läggs uppe till höger, nere skyms den av kortet
       })
+    } catch (error) {
+      // Oftast saknat WebGL-stöd
+      console.error('Kartan kunde inte startas:', error)
+      latest.current.onStatusChange('error')
+      return
     }
+    map.touchZoomRotate.disableRotation()
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'top-right')
+    map.getCanvas().setAttribute('aria-label', 'Karta över barer. Listan över barer i vyn finns bredvid kartan.')
+    mapRef.current = map
 
-    // Källa och klusterlager läggs till vid varje stilladdning, så att de
-    // finns kvar om stilen byts när temat ändras
-    map.on('style.load', () => {
+    // Prisnålarnas typsnitt — samma som priserna i resten av appen
+    const fontFamily = getComputedStyle(document.documentElement).getPropertyValue('--font-mono').trim()
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 3)
+
+    let loaded = false
+    const timeout = window.setTimeout(() => {
+      if (!loaded) latest.current.onStatusChange('error')
+    }, LOAD_TIMEOUT_MS)
+
+    // Nålar ritas när kartan ber om dem — bild-id:t beskriver hela utseendet
+    map.on('styleimagemissing', event => {
+      const style = parsePinImageId(event.id)
+      if (!style || map.hasImage(event.id)) return
+      const image = drawPin(style, fontFamily, pixelRatio)
+      if (image) map.addImage(event.id, image, { pixelRatio })
+    })
+
+    // Källa och lager läggs till vid varje stilladdning, så att de finns kvar
+    // om stilen byts när temat ändras
+    function addBarLayers() {
+      const { bars, now, selectedId, showUnpriced } = latest.current
       if (theme === 'dark' && map.getLayer('background')) {
         map.setPaintProperty('background', 'background-color', DARK_MAP_BACKGROUND)
       }
-      markers.forEach(marker => marker.remove())
-      markers.clear()
-      map.addSource('bars', {
-        type: 'geojson',
-        data: toGeoJSON(Array.from(barsByIdRef.current.values())),
-        cluster: true,
-        clusterRadius: 50,
-        clusterMaxZoom: 15,
-      })
-      // Kluster: cirkel med antal barer (K2)
+      map.addSource('bars', { type: 'geojson', data: toFeatureCollection(bars, now) })
+
+      // Barer utan pris: små grå prickar
       map.addLayer({
-        id: 'bar-clusters',
+        id: 'bars-unpriced',
         type: 'circle',
         source: 'bars',
-        filter: ['has', 'point_count'],
+        filter: ['!', ['get', 'priced']],
+        layout: { visibility: showUnpriced ? 'visible' : 'none' },
         paint: {
-          'circle-color': colors.brand.DEFAULT,
-          'circle-radius': ['step', ['get', 'point_count'], 18, 10, 24, 50, 30],
-          'circle-stroke-width': 2,
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 2.5, 14, 4, 17, 6.5],
+          'circle-color': colors.muted,
+          'circle-opacity': 0.7,
+          'circle-stroke-width': 1,
           'circle-stroke-color': colors.ink,
         },
       })
+      // Barer med pris: prick i prisets färg — syns även när nålen inte får plats
       map.addLayer({
-        id: 'bar-cluster-count',
+        id: 'bars-dots',
+        type: 'circle',
+        source: 'bars',
+        filter: ['get', 'priced'],
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 4, 14, 6, 17, 8],
+          'circle-color': [
+            'match', ['get', 'tier'],
+            'cheap', TIER_COLORS.cheap,
+            'mid', TIER_COLORS.mid,
+            'pricey', TIER_COLORS.pricey,
+            colors.muted,
+          ],
+          'circle-stroke-width': 1.5,
+          'circle-stroke-color': colors.ink,
+        },
+      })
+      // Prisnålar: krockar löses så att billigast syns
+      map.addLayer({
+        id: 'bars-pins',
         type: 'symbol',
         source: 'bars',
-        filter: ['has', 'point_count'],
+        filter: ['get', 'priced'],
+        minzoom: 11,
         layout: {
-          'text-field': ['get', 'point_count_abbreviated'],
-          'text-font': ['Noto Sans Bold'],
-          'text-size': 14,
+          'icon-image': ['get', 'pin'],
+          'icon-allow-overlap': false,
+          'icon-padding': 2,
+          'symbol-sort-key': ['get', 'sort'],
         },
-        paint: { 'text-color': colors.ink },
       })
+      // Vald bar överst, alltid synlig
+      map.addLayer({
+        id: 'bars-selected',
+        type: 'symbol',
+        source: 'bars',
+        filter: selectedFilter(selectedId),
+        layout: {
+          'icon-image': ['get', 'pinSelected'],
+          'icon-allow-overlap': true,
+        },
+      })
+    }
+
+    map.on('style.load', addBarLayers)
+
+    map.on('load', () => {
+      loaded = true
+      readyRef.current = true
+      window.clearTimeout(timeout)
+      latest.current.onStatusChange('ready')
+      latest.current.onViewChange(boundsOf(map))
+      if (pendingFocus.current) flyToBar(pendingFocus.current.id, true)
+      pendingFocus.current = null
     })
 
-    // Tryck på kluster zoomar in tills det delar upp sig
-    map.on('click', 'bar-clusters', async event => {
-      const feature = event.features?.[0]
-      if (!feature) return
-      const source = map.getSource('bars') as maplibregl.GeoJSONSource
-      const zoom = await source.getClusterExpansionZoom(feature.properties.cluster_id)
-      map.easeTo({ center: (feature.geometry as GeoJSON.Point).coordinates as [number, number], zoom })
+    // Fel innan kartan laddats betyder att stilen eller kartbilden inte gick att hämta
+    map.on('error', event => {
+      console.error('Kartfel:', event.error)
+      if (!loaded) latest.current.onStatusChange('error')
     })
-    map.on('mouseenter', 'bar-clusters', () => { map.getCanvas().style.cursor = 'pointer' })
-    map.on('mouseleave', 'bar-clusters', () => { map.getCanvas().style.cursor = '' })
-    map.on('render', syncMarkers)
+
+    map.on('moveend', () => latest.current.onViewChange(boundsOf(map)))
+
+    // Närmaste bar inom fingerbredd från trycket
+    function barAt(point: maplibregl.Point, radius: number): string | null {
+      const box: [maplibregl.PointLike, maplibregl.PointLike] = [
+        [point.x - radius, point.y - radius],
+        [point.x + radius, point.y + radius],
+      ]
+      for (const layer of HIT_LAYERS) {
+        if (!map.getLayer(layer) || map.getLayoutProperty(layer, 'visibility') === 'none') continue
+        const hits = map.queryRenderedFeatures(box, { layers: [layer] })
+        if (hits.length === 0) continue
+        let best = hits[0]
+        let bestDist = Infinity
+        for (const hit of hits) {
+          const [lng, lat] = (hit.geometry as GeoJSON.Point).coordinates
+          const p = map.project([lng, lat])
+          const d = (p.x - point.x) ** 2 + (p.y - point.y) ** 2
+          if (d < bestDist) { best = hit; bestDist = d }
+        }
+        return (best.properties as { id?: string }).id ?? null
+      }
+      return null
+    }
+
+    map.on('click', event => latest.current.onSelect(barAt(event.point, HIT_RADIUS)))
+    map.on('mousemove', event => {
+      map.getCanvas().style.cursor = barAt(event.point, 6) ? 'pointer' : ''
+    })
+
+    // Flyg till en bar så att den hamnar ovanför kortet
+    function flyToBar(id: string, instant = false) {
+      const bar = latest.current.bars.find(b => b.id === id)
+      if (!bar || bar.lat === null || bar.lng === null) return
+      const target: [number, number] = [bar.lng, bar.lat]
+      const padding = { top: 40, right: 40, left: 40, bottom: latest.current.bottomInset + 40 }
+      const point = map.project(target)
+      const canvas = map.getCanvas()
+      const inView =
+        point.x > padding.left && point.x < canvas.clientWidth - padding.right &&
+        point.y > padding.top && point.y < canvas.clientHeight - padding.bottom
+      if (inView && map.getZoom() >= 14) return
+      const options = { center: target, zoom: Math.max(map.getZoom(), 15), padding }
+      if (instant || prefersReducedMotion()) map.jumpTo(options)
+      else map.easeTo({ ...options, duration: 600 })
+    }
+    flyToBarRef.current = flyToBar
 
     // Byt stil om html-elementets tema ändras
     const observer = new MutationObserver(() => {
@@ -215,23 +274,43 @@ export default function BarMap({ bars, userPosition = null, centerRequest = 0 }:
 
     // Städa upp kartan när komponenten avmonteras
     return () => {
+      window.clearTimeout(timeout)
       observer.disconnect()
-      markers.forEach(marker => marker.remove())
-      markers.clear()
+      userMarkerRef.current?.remove()
+      userMarkerRef.current = null
       map.remove()
       mapRef.current = null
+      readyRef.current = false
+      flyToBarRef.current = null
     }
   }, [])
 
-  // Uppdatera källan när barerna ändras (t.ex. nya filter) utan att bygga om kartan
+  // Uppdatera källan när barerna, filtren eller klockan (happy hour) ändras
   useEffect(() => {
-    barsByIdRef.current = new Map(bars.map(bar => [bar.id, bar]))
-    // Nålar byggs om med aktuellt pris och happy hour-status
-    markersRef.current.forEach(marker => marker.remove())
-    markersRef.current.clear()
     const source = mapRef.current?.getSource('bars') as maplibregl.GeoJSONSource | undefined
-    source?.setData(toGeoJSON(bars))
-  }, [bars])
+    source?.setData(toFeatureCollection(bars, now))
+  }, [bars, now])
+
+  // Markera vald bar
+  useEffect(() => {
+    const map = mapRef.current
+    if (map?.getLayer('bars-selected')) map.setFilter('bars-selected', selectedFilter(selectedId))
+  }, [selectedId])
+
+  // Visa eller dölj barer utan pris
+  useEffect(() => {
+    const map = mapRef.current
+    if (map?.getLayer('bars-unpriced')) {
+      map.setLayoutProperty('bars-unpriced', 'visibility', showUnpriced ? 'visible' : 'none')
+    }
+  }, [showUnpriced])
+
+  // Flyg till en bar på begäran — väntar tills kartan laddats
+  useEffect(() => {
+    if (!focus) return
+    if (readyRef.current && flyToBarRef.current) flyToBarRef.current(focus.id)
+    else pendingFocus.current = focus
+  }, [focus])
 
   // Användarens position som blå prick (K3)
   useEffect(() => {
@@ -254,32 +333,16 @@ export default function BarMap({ bars, userPosition = null, centerRequest = 0 }:
 
   // Centrera på användaren när knappen trycks och positionen finns
   useEffect(() => {
-    if (!centerRequest || !userPosition || !mapRef.current) return
-    mapRef.current.easeTo({
-      center: [userPosition.lng, userPosition.lat],
-      zoom: Math.max(mapRef.current.getZoom(), 15),
-    })
+    const map = mapRef.current
+    if (!centerRequest || !userPosition || !map) return
+    const options = {
+      center: [userPosition.lng, userPosition.lat] as [number, number],
+      zoom: Math.max(map.getZoom(), 15),
+      padding: { top: 40, right: 40, left: 40, bottom: latest.current.bottomInset + 40 },
+    }
+    if (prefersReducedMotion()) map.jumpTo(options)
+    else map.easeTo(options)
   }, [centerRequest, userPosition])
 
-  return (
-    <div className="relative w-full h-full">
-      <div ref={containerRef} className="w-full h-full rounded-xl overflow-hidden" />
-
-      {/* Förklaring av nålarna */}
-      <div className="absolute bottom-10 left-4 z-10 bg-surface/90 backdrop-blur-sm rounded-lg p-3 text-sm space-y-1.5 border border-line">
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-success" /> Under 35 kr
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-warning" /> 35–55 kr
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-danger" /> Över 55 kr
-        </div>
-        <div className="flex items-center gap-2">
-          <Zap aria-hidden="true" className="w-3.5 h-3.5 text-cream" /> Happy hour nu
-        </div>
-      </div>
-    </div>
-  )
+  return <div ref={containerRef} className="w-full h-full" />
 }
