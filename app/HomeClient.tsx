@@ -3,15 +3,16 @@
 
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import type { Bar } from '@/lib/supabase'
-import { isHappyHourActive, getComparablePrice } from '@/lib/happyHour'
-import { getOpenStatus } from '@/lib/openingHours'
+import { getComparablePrice } from '@/lib/happyHour'
+import { applyFilters, filtersToQueryString, hasActiveFilters } from '@/lib/filters'
+import { useUrlFilters } from '@/lib/useUrlFilters'
 import { useNow } from '@/lib/useNow'
 import { distanceToBar } from '@/lib/geo'
 import { useUserLocation } from '@/lib/useUserLocation'
-import FilterPills, { type Filter } from '@/components/FilterPills'
+import FilterPills from '@/components/FilterPills'
 import BarCard from '@/components/BarCard'
 
 type Sort = 'billigast' | 'närmast'
@@ -28,10 +29,9 @@ type Props = {
 export default function HomeClient({ bars, missingPriceCount, renderedAt }: Props) {
   // Aktuell tid i Stockholm — samma värde för filter och alla kort
   const now = useNow(renderedAt)
-  // Aktivt filter
-  const [activeFilter, setActiveFilter] = useState<Filter>('alla')
-  // Söktext
-  const [search, setSearch] = useState('')
+  // Kombinerbara filter och sökning, speglade i URL:en (F2)
+  const { filters, setFilters, resetFilters } = useUrlFilters()
+  const searchRef = useRef<HTMLInputElement>(null)
   // Sortering och "Nära mig" — position hämtas först när användaren ber om det
   const [sort, setSort] = useState<Sort>('billigast')
   const [nearMe, setNearMe] = useState(false)
@@ -65,22 +65,9 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
     // Bara barer med pris rankas (D2)
     let result = bars.filter(b => getComparablePrice(b, now) !== null)
 
-    // Filtrera på aktiv filter
-    switch (activeFilter) {
-      case 'öppet-nu':
-        result = result.filter(b => getOpenStatus(b, now).isOpen)
-        break
-      case 'happy-hour-nu':
-        result = result.filter(b => isHappyHourActive(b, now))
-        break
-      case 'Södermalm':
-      case 'Kungsholmen':
-      case 'Vasastan':
-      case 'Östermalm':
-      case 'City':
-        result = result.filter(b => b.area === activeFilter)
-        break
-    }
+
+    // Alla aktiva filter måste stämma — samma logik som kartan (lib/filters.ts)
+    result = applyFilters(result, filters, now)
 
     // Nära mig — bara barer inom gångavstånd (väntar tills positionen finns)
     if (nearMeActive && hasPosition) {
@@ -90,21 +77,13 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
       })
     }
 
-    // Filtrera på söktext (namn eller stadsdel)
-    if (search.trim()) {
-      const q = search.toLowerCase()
-      result = result.filter(
-        b => b.name.toLowerCase().includes(q) || (b.area ?? '').toLowerCase().includes(q)
-      )
-    }
-
     // Sortera: närmast först (barer utan koordinater sist) eller pris per 40 cl
     if (sortByDistance) {
       const d = (bar: Bar) => distances.get(bar.id) ?? Infinity
       return result.sort((a, b) => d(a) - d(b))
     }
     return result.sort((a, b) => (getComparablePrice(a, now) ?? 0) - (getComparablePrice(b, now) ?? 0))
-  }, [bars, activeFilter, search, now, nearMeActive, hasPosition, sortByDistance, distances])
+  }, [bars, filters, now, nearMeActive, hasPosition, sortByDistance, distances])
 
   return (
     <div className="min-h-screen bg-[#1a1a18]">
@@ -120,7 +99,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
 
             {/* Navigation */}
             <nav className="flex items-center gap-1 text-sm -mr-2">
-              <Link href="/map" className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
+              <Link href={`/map${filtersToQueryString(filters)}`} className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
                 🗺️ Karta
               </Link>
               <Link href="/submit" className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
@@ -139,17 +118,19 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A3A199]">🔍</span>
           <input
             type="text"
+            ref={searchRef}
+            aria-label="Sök bar eller stadsdel"
             placeholder="Sök bar eller stadsdel..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
+            value={filters.query}
+            onChange={e => setFilters({ query: e.target.value })}
             className="w-full pl-9 pr-4 py-2.5 bg-[#2c2c2a] border border-[#3a3a38] rounded-xl text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
           />
         </div>
 
         {/* Filterpills */}
         <FilterPills
-          active={activeFilter}
-          onChange={setActiveFilter}
+          filters={filters}
+          onChange={setFilters}
           nearMe={nearMeActive}
           onToggleNearMe={locationBlocked ? undefined : toggleNearMe}
         />
@@ -200,9 +181,9 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
           <p className="text-xs text-[#A3A199]">
             {filteredBars.length} {filteredBars.length === 1 ? 'bar' : 'barer'} hittades
           </p>
-          {(activeFilter !== 'alla' || nearMeActive) && (
+          {(hasActiveFilters(filters) || nearMeActive) && (
             <button
-              onClick={() => { setActiveFilter('alla'); setSearch(''); setNearMe(false) }}
+              onClick={() => { resetFilters(); setNearMe(false); searchRef.current?.focus() }}
               className="min-h-[44px] px-2 -mr-2 text-sm text-[#EF9F27] hover:text-[#F5C55B]"
             >
               Rensa filter ×
