@@ -1,0 +1,13 @@
+// Vitest-konfiguration — enhetstester för ren logik i lib/
+import { defineConfig } from 'vitest/config'
+import path from 'path'
+
+export default defineConfig({
+  resolve: {
+    alias: { '@': path.resolve(__dirname, '.') },
+  },
+  test: {
+    include: ['lib/**/*.test.ts'],
+    environment: 'node',
+  },
+})
