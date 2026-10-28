@@ -14,10 +14,11 @@ import BarCard from '@/components/BarCard'
 
 type Props = {
   bars: Bar[]
+  missingPriceCount: number // barer utan pris, länkas till /saknar-pris
   renderedAt: number // serverns tidsstämpel, se useNow
 }
 
-export default function HomeClient({ bars, renderedAt }: Props) {
+export default function HomeClient({ bars, missingPriceCount, renderedAt }: Props) {
   // Aktuell tid i Stockholm — samma värde för filter och alla kort
   const now = useNow(renderedAt)
   // Aktivt filter
@@ -27,7 +28,8 @@ export default function HomeClient({ bars, renderedAt }: Props) {
 
   // Filtrering och sortering — memoizeras för prestanda
   const filteredBars = useMemo(() => {
-    let result = [...bars]
+    // Bara barer med pris rankas (D2)
+    let result = bars.filter(b => getComparablePrice(b, now) !== null)
 
     // Filtrera på aktiv filter
     switch (activeFilter) {
@@ -54,20 +56,9 @@ export default function HomeClient({ bars, renderedAt }: Props) {
       )
     }
 
-    // Sortera på pris per 40 cl (billigast först), sedan barer utan pris
-    return result.sort((a, b) => {
-      const priceA = getComparablePrice(a, now)
-      const priceB = getComparablePrice(b, now)
-      if (priceA === null && priceB === null) return 0
-      if (priceA === null) return 1
-      if (priceB === null) return -1
-      return priceA - priceB
-    })
+    // Sortera på pris per 40 cl, billigast först
+    return result.sort((a, b) => (getComparablePrice(a, now) ?? 0) - (getComparablePrice(b, now) ?? 0))
   }, [bars, activeFilter, search, now])
-
-  // Dela upp i "med pris" och "utan pris" för visning
-  const withPrice = filteredBars.filter(b => getComparablePrice(b, now) !== null)
-  const withoutPrice = filteredBars.filter(b => getComparablePrice(b, now) === null)
 
   return (
     <div className="min-h-screen bg-[#1a1a18]">
@@ -139,27 +130,24 @@ export default function HomeClient({ bars, renderedAt }: Props) {
           </div>
         )}
 
-        {/* Barer med pris */}
+        {/* Rankade barer — bara de som har pris */}
         <div className="space-y-2">
-          {withPrice.map((bar, i) => (
+          {filteredBars.map((bar, i) => (
             <BarCard key={bar.id} bar={bar} rank={i + 1} now={now} />
           ))}
         </div>
 
-        {/* Barer utan pris — separerad sektion */}
-        {withoutPrice.length > 0 && (
-          <div className="mt-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="flex-1 h-px bg-[#3a3a38]" />
-              <span className="text-xs text-[#888780] flex-shrink-0">Pris saknas</span>
-              <div className="flex-1 h-px bg-[#3a3a38]" />
-            </div>
-            <div className="space-y-2">
-              {withoutPrice.map((bar, i) => (
-                <BarCard key={bar.id} bar={bar} rank={withPrice.length + i + 1} now={now} />
-              ))}
-            </div>
-          </div>
+        {/* Barer utan pris rankas inte — en rad som leder till listan där man kan fylla i */}
+        {missingPriceCount > 0 && (
+          <Link
+            href="/saknar-pris"
+            className="mt-4 flex items-center justify-between gap-3 min-h-[44px] px-4 py-3 rounded-xl border border-dashed border-[#3a3a38] text-sm text-[#888780] hover:border-[#BA7517] hover:text-[#F1EFE8] transition-colors"
+          >
+            <span>
+              {missingPriceCount} {missingPriceCount === 1 ? 'bar saknar' : 'barer saknar'} pris – vet du vad det kostar?
+            </span>
+            <span aria-hidden="true" className="text-[#EF9F27]">→</span>
+          </Link>
         )}
 
         {/* Uppmaning att lägga till barer */}

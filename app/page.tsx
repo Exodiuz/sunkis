@@ -20,11 +20,26 @@ async function getBars() {
   return data ?? []
 }
 
+// Antal barer (granskade eller inte) som helt saknar pris — visas som uppmaning (D2)
+async function getMissingPriceCount() {
+  const { count, error } = await supabase
+    .from('bars')
+    .select('id', { count: 'exact', head: true })
+    .is('price_40cl', null)
+    .is('price_50cl', null)
+
+  if (error) {
+    console.error('Fel vid räkning av barer utan pris:', error)
+    return 0
+  }
+  return count ?? 0
+}
+
 // Revalidera sidan var 5:e minut
 export const revalidate = 300
 
 export default async function HomePage() {
-  const bars = await getBars()
+  const [bars, missingPriceCount] = await Promise.all([getBars(), getMissingPriceCount()])
 
-  return <HomeClient bars={bars} renderedAt={Date.now()} />
+  return <HomeClient bars={bars} missingPriceCount={missingPriceCount} renderedAt={Date.now()} />
 }
