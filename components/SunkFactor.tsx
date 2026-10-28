@@ -55,35 +55,49 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
     setLoading(false)
   }
 
+  const isInteractive = !!barId && !voted
+
   // Ritar 5 cirklar — fylld, halvfylld eller tom beroende på poäng
   return (
     <div className="flex flex-col gap-1">
-      <div className={`flex items-center ${gap}`}>
+      <div
+        className={`flex items-center ${isInteractive ? '' : gap}`}
+        role={isInteractive ? 'group' : 'img'}
+        aria-label={isInteractive ? 'Rösta på sunkfaktor' : `Sunkfaktor ${localScore.toFixed(1)} av 5`}
+      >
         {[1, 2, 3, 4, 5].map((i) => {
           // Beräkna fyllnadsgrad för denna cirkel
           const fill = Math.min(Math.max(displayScore - (i - 1), 0), 1)
-          const isInteractive = !!barId && !voted
+          const circle = (
+            <span className={`${circleSize} relative block rounded-full overflow-hidden`}>
+              {/* Tom cirkel som bakgrund */}
+              <span className="absolute inset-0 rounded-full border border-[#888780]" />
+              {/* Fylld del — täcker cirkeln baserat på fill-värdet */}
+              <span
+                className="absolute inset-0 rounded-full bg-[#EF9F27]"
+                style={{ clipPath: `inset(0 ${100 - fill * 100}% 0 0)` }}
+              />
+            </span>
+          )
 
+          if (!isInteractive) return <span key={i} aria-hidden="true">{circle}</span>
+
+          // Röstläge: varje cirkel får en träffyta på 44 × 44 px
           return (
             <button
               key={i}
               type="button"
-              disabled={!isInteractive || loading}
+              disabled={loading}
               onClick={() => handleVote(i)}
-              onMouseEnter={() => isInteractive && setHovered(i)}
-              onMouseLeave={() => isInteractive && setHovered(null)}
-              className={`${circleSize} relative rounded-full overflow-hidden transition-transform ${
-                isInteractive ? 'cursor-pointer hover:scale-110' : 'cursor-default'
-              }`}
-              title={isInteractive ? `Ge ${i} sunkpoäng` : undefined}
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
+              onFocus={() => setHovered(i)}
+              onBlur={() => setHovered(null)}
+              className="w-11 h-11 flex items-center justify-center rounded-full cursor-pointer transition-transform hover:scale-110"
+              aria-label={`Ge ${i} av 5 i sunkfaktor`}
+              title={`Ge ${i} sunkpoäng`}
             >
-              {/* Tom cirkel som bakgrund */}
-              <div className="absolute inset-0 rounded-full border border-[#888780]" />
-              {/* Fylld del — täcker cirkeln baserat på fill-värdet */}
-              <div
-                className="absolute inset-0 rounded-full bg-[#EF9F27]"
-                style={{ clipPath: `inset(0 ${100 - fill * 100}% 0 0)` }}
-              />
+              {circle}
             </button>
           )
         })}

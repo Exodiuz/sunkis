@@ -37,7 +37,7 @@ const AREA_FILTERS: { label: string; value: Filter }[] = [
 
 function pillClass(selected: boolean) {
   return `
-    flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium
+    flex-shrink-0 inline-flex items-center min-h-[44px] px-4 rounded-full text-sm font-medium
     border transition-all duration-150
     ${selected
       ? 'bg-[#BA7517] border-[#BA7517] text-white'

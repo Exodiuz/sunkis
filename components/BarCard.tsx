@@ -24,7 +24,7 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
   const priceUncertain = bar.price_thumbs_down >= 5
 
   return (
-    <div className="flex flex-col bg-[#2c2c2a] rounded-xl border border-[#3a3a38] overflow-hidden hover:border-[#BA7517]/50 transition-colors">
+    <div className="relative flex flex-col bg-[#2c2c2a] rounded-xl border border-[#3a3a38] overflow-hidden hover:border-[#BA7517]/50 transition-colors">
       <div className="flex items-stretch gap-0">
         {/* Ranknummer — vänster kantkolumn, bara för barer med pris */}
         {rank !== undefined && price !== null && (
@@ -38,7 +38,10 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
           <div className="flex items-start justify-between gap-2">
             {/* Vänster: namn, stadsdel, öppettider */}
             <div className="min-w-0">
-              <Link href={`/bar/${bar.id}`} className="hover:text-[#EF9F27] transition-colors">
+              <Link
+                href={`/bar/${bar.id}`}
+                className="hover:text-[#EF9F27] transition-colors after:absolute after:inset-0 after:rounded-xl"
+              >
                 <h2 className="font-medium text-[#F1EFE8] truncate">{bar.name}</h2>
               </Link>
 

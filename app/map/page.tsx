@@ -40,9 +40,9 @@ export default async function MapPage() {
     <div className="flex flex-col h-screen bg-[#1a1a18]">
       {/* Header */}
       <header className="flex-shrink-0 bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
-        <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-screen-xl mx-auto px-4 py-1 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-xl font-medium">
+            <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-medium">
               <span className="text-[#EF9F27]">sunk</span>
               <span className="text-[#F5C55B]">is</span>
             </Link>
@@ -50,11 +50,11 @@ export default async function MapPage() {
               {bars.length} barer på kartan
             </span>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <Link href="/" className="text-[#888780] hover:text-[#EF9F27] transition-colors">
+          <div className="flex items-center gap-1 text-sm -mr-2">
+            <Link href="/" className="inline-flex items-center min-h-[44px] px-2 text-[#888780] hover:text-[#EF9F27] transition-colors">
               ☰ Lista
             </Link>
-            <Link href="/submit" className="text-[#888780] hover:text-[#EF9F27] transition-colors">
+            <Link href="/submit" className="inline-flex items-center min-h-[44px] px-2 text-[#888780] hover:text-[#EF9F27] transition-colors">
               + Lägg till
             </Link>
           </div>

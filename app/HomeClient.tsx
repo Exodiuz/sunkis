@@ -113,17 +113,17 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-1">
             {/* Logga: "sunkis" med "is" i ljusare amber */}
-            <Link href="/" className="text-2xl font-medium tracking-tight">
+            <Link href="/" className="inline-flex items-center min-h-[44px] text-2xl font-medium tracking-tight">
               <span className="text-[#EF9F27]">sunk</span>
               <span className="text-[#F5C55B]">is</span>
             </Link>
 
             {/* Navigation */}
-            <nav className="flex items-center gap-3 text-sm">
-              <Link href="/map" className="text-[#888780] hover:text-[#EF9F27] transition-colors">
+            <nav className="flex items-center gap-1 text-sm -mr-2">
+              <Link href="/map" className="inline-flex items-center min-h-[44px] px-2 text-[#888780] hover:text-[#EF9F27] transition-colors">
                 🗺️ Karta
               </Link>
-              <Link href="/submit" className="text-[#888780] hover:text-[#EF9F27] transition-colors">
+              <Link href="/submit" className="inline-flex items-center min-h-[44px] px-2 text-[#888780] hover:text-[#EF9F27] transition-colors">
                 + Lägg till
               </Link>
             </nav>
@@ -196,7 +196,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
           {(activeFilter !== 'alla' || nearMeActive) && (
             <button
               onClick={() => { setActiveFilter('alla'); setSearch(''); setNearMe(false) }}
-              className="text-xs text-[#BA7517] hover:text-[#EF9F27]"
+              className="min-h-[44px] px-2 -mr-2 text-sm text-[#EF9F27] hover:text-[#F5C55B]"
             >
               Rensa filter ×
             </button>

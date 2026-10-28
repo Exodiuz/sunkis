@@ -67,12 +67,12 @@ export default async function BarPage({ params }: Props) {
     <div className="min-h-screen bg-[#1a1a18]">
       {/* Header */}
       <header className="bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/" className="text-[#888780] hover:text-[#EF9F27] transition-colors">
+        <div className="max-w-2xl mx-auto px-4 py-1 flex items-center gap-3">
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-[#888780] hover:text-[#EF9F27] transition-colors">
             ← Tillbaka
           </Link>
           <span className="text-[#3a3a38]">/</span>
-          <Link href="/" className="text-xl font-medium">
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-medium">
             <span className="text-[#EF9F27]">sunk</span>
             <span className="text-[#F5C55B]">is</span>
           </Link>
@@ -206,7 +206,7 @@ export default async function BarPage({ params }: Props) {
               href={`https://www.google.com/maps/search/?api=1&query=${bar.lat},${bar.lng}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#888780] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
+              className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#888780] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
             >
               📍 Öppna i Google Maps
             </a>
@@ -218,7 +218,7 @@ export default async function BarPage({ params }: Props) {
               href={bar.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#888780] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
+              className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#888780] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
             >
               🌐 Webbplats
             </a>
@@ -228,7 +228,7 @@ export default async function BarPage({ params }: Props) {
           {bar.phone && (
             <a
               href={`tel:${bar.phone}`}
-              className="flex items-center gap-2 px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#888780] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
+              className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#888780] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
             >
               📞 {bar.phone}
             </a>
@@ -238,7 +238,7 @@ export default async function BarPage({ params }: Props) {
         {/* Tillbaka-knapp */}
         <Link
           href="/"
-          className="inline-block text-sm text-[#888780] hover:text-[#EF9F27] transition-colors"
+          className="inline-flex items-center min-h-[44px] text-sm text-[#888780] hover:text-[#EF9F27] transition-colors"
         >
           ← Tillbaka till listan
         </Link>

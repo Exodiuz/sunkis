@@ -106,12 +106,12 @@ export default function SubmitPage() {
     <div className="min-h-screen bg-[#1a1a18]">
       {/* Header */}
       <header className="bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/" className="text-[#888780] hover:text-[#EF9F27] transition-colors">
+        <div className="max-w-2xl mx-auto px-4 py-1 flex items-center gap-3">
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-[#888780] hover:text-[#EF9F27] transition-colors">
             ← Tillbaka
           </Link>
           <span className="text-[#3a3a38]">/</span>
-          <Link href="/" className="text-xl font-medium">
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-medium">
             <span className="text-[#EF9F27]">sunk</span>
             <span className="text-[#F5C55B]">is</span>
           </Link>
@@ -263,7 +263,8 @@ export default function SubmitPage() {
                     key={value}
                     type="button"
                     onClick={() => toggleDay(value)}
-                    className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
+                    aria-pressed={hhDays.includes(value)}
+                    className={`min-h-[44px] min-w-[44px] px-3 rounded-lg text-sm border transition-colors ${
                       hhDays.includes(value)
                         ? 'bg-[#BA7517] border-[#BA7517] text-white'
                         : 'bg-[#1a1a18] border-[#3a3a38] text-[#888780]'
@@ -286,7 +287,9 @@ export default function SubmitPage() {
                   key={n}
                   type="button"
                   onClick={() => setSunkFactor(n)}
-                  className={`w-10 h-10 rounded-full border-2 transition-all text-sm font-medium ${
+                  aria-pressed={sunkFactor === n}
+                  aria-label={`Sunkfaktor ${n} av 5`}
+                  className={`w-11 h-11 rounded-full border-2 transition-all text-sm font-medium ${
                     sunkFactor >= n
                       ? 'bg-[#EF9F27] border-[#EF9F27] text-[#1a1a18]'
                       : 'bg-transparent border-[#3a3a38] text-[#888780]'

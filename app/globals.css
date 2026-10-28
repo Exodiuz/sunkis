@@ -30,6 +30,14 @@ body {
   background: var(--color-bg);
 }
 
+/* Zoomknapparna får träffytor på 44 × 44 px */
+.leaflet-touch .leaflet-bar a,
+.leaflet-bar a {
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+}
+
 /* Mörkt tema för Leaflet-popups */
 .leaflet-popup-content-wrapper {
   background: var(--color-surface) !important;
