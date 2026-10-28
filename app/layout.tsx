@@ -58,9 +58,10 @@ export default function RootLayout({
   return (
     <html lang="sv" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
       <head>
-        {/* Favicon — SVG-ikonen som genererades av scripts/generate-icons.js */}
-        <link rel="icon" href="/icons/icon-192.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+        {/* Ikoner från scripts/generate-icons.js — SVG-favicon, PNG för iOS (som inte läser SVG) */}
+        <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/icons/icon-192.png" type="image/png" sizes="192x192" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180" />
       </head>
       <body className="font-sans antialiased min-h-screen bg-ink text-cream">
         {children}
