@@ -9,6 +9,7 @@ import { getCurrentPrice, isHappyHourActive, formatHappyHourTime, formatSize } f
 import SunkFactor from './SunkFactor'
 import HappyHourBadge from './HappyHourBadge'
 import OpenStatus from './OpenStatus'
+import PriceFreshness from './PriceFreshness'
 import { formatDistance } from '@/lib/geo'
 
 type Props = {
@@ -94,9 +95,10 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
             </div>
           </div>
 
-          {/* Botten: sunkfaktor */}
-          <div className="flex items-center mt-2 pt-2 border-t border-[#3a3a38]">
+          {/* Botten: sunkfaktor och prisets färskhet */}
+          <div className="flex items-center justify-between gap-2 flex-wrap mt-2 pt-2 border-t border-[#3a3a38]">
             <SunkFactor score={bar.sunk_factor} size="sm" />
+            <PriceFreshness bar={bar} now={now} />
           </div>
         </div>
       </div>

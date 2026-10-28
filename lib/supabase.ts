@@ -29,6 +29,7 @@ export type Bar = {
   price_verified: boolean
   price_thumbs_up: number
   price_thumbs_down: number
+  price_confirmed_at: string | null // senaste bekräftelse av priset (D3)
   created_at: string
   updated_at: string
 }

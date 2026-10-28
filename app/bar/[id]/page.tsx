@@ -15,6 +15,7 @@ import SunkFactor from '@/components/SunkFactor'
 import PriceVote from '@/components/PriceVote'
 import HappyHourBadge from '@/components/HappyHourBadge'
 import OpenStatus from '@/components/OpenStatus'
+import PriceFreshness from '@/components/PriceFreshness'
 
 type Props = {
   params: { id: string }
@@ -156,13 +157,14 @@ export default async function BarPage({ params }: Props) {
             </div>
           )}
 
-          {/* Verifieringsindikator */}
-          <div className="flex items-center gap-2 pt-1">
+          {/* Verifiering och färskhet (D3) */}
+          <div className="flex items-center gap-2 flex-wrap pt-1">
             {bar.price_verified ? (
-              <span className="text-xs text-[#4ade80]">✓ Prisverifierat</span>
+              <span className="text-sm text-[#4ade80]">✓ Prisverifierat</span>
             ) : (
-              <span className="text-xs text-[#A3A199]">Ej verifierat</span>
+              <span className="text-sm text-[#A3A199]">Ej verifierat</span>
             )}
+            <PriceFreshness bar={bar} className="text-sm" />
           </div>
         </div>
 
