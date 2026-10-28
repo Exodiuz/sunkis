@@ -8,8 +8,10 @@ export const MAP_STYLES: Record<MapTheme, string> = {
   light: 'https://tiles.openfreemap.org/styles/positron',
 }
 
+import { colors } from './theme'
+
 // Bakgrunden i den mörka stilen tonas till appens bakgrund så att kartan smälter in
-export const DARK_MAP_BACKGROUND = '#1a1a18'
+export const DARK_MAP_BACKGROUND = colors.ink
 
 export function mapThemeFromDocument(root: { dataset: { theme?: string } }): MapTheme {
   return root.dataset.theme === 'light' ? 'light' : 'dark'

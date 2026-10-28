@@ -13,9 +13,9 @@ type Props = {
 export default function PriceFreshness({ bar, now, className = 'text-sm' }: Props) {
   const { stale, label } = getFreshness(bar, now)
   return (
-    <span className={`${className} text-[#A3A199]`}>
+    <span className={`${className} text-muted`}>
       {label}
-      {stale && <span className="text-[#facc15]"> · Kan vara inaktuellt</span>}
+      {stale && <span className="text-warning"> · Kan vara inaktuellt</span>}
     </span>
   )
 }

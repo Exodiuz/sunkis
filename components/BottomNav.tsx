@@ -26,7 +26,7 @@ export default function BottomNav() {
       <div aria-hidden="true" className="h-16 pb-[env(safe-area-inset-bottom)]" />
       <nav
         aria-label="Huvudmeny"
-        className="fixed inset-x-0 bottom-0 z-30 bg-[#1a1a18]/95 backdrop-blur-sm border-t border-[#2c2c2a] pb-[env(safe-area-inset-bottom)]"
+        className="fixed inset-x-0 bottom-0 z-30 bg-ink/95 backdrop-blur-sm border-t border-surface pb-[env(safe-area-inset-bottom)]"
       >
         <ul className="max-w-2xl mx-auto grid grid-cols-3 h-16">
           {ITEMS.map(({ href, label, icon: Icon, carriesFilters }) => {
@@ -44,7 +44,7 @@ export default function BottomNav() {
                     }
                   }}
                   className={`flex flex-col items-center justify-center gap-0.5 h-full text-sm transition-colors ${
-                    active ? 'text-[#EF9F27]' : 'text-[#A3A199] hover:text-[#F1EFE8]'
+                    active ? 'text-brand-light' : 'text-muted hover:text-cream'
                   }`}
                 >
                   <Icon aria-hidden="true" className="w-5 h-5" />

@@ -6,6 +6,7 @@
 import { Clock, LocateFixed, Zap } from 'lucide-react'
 import { MAX_PRICE_OPTIONS, MIN_SUNK_OPTIONS, type BarFilters } from '@/lib/filters'
 import { SUNK_LEVELS } from '@/lib/sunk'
+import { colors } from '@/lib/theme'
 
 type Props = {
   filters: BarFilters
@@ -20,8 +21,8 @@ function pillClass(selected: boolean) {
     flex-shrink-0 inline-flex items-center min-h-[44px] px-4 rounded-full text-sm font-medium
     border transition-all duration-150
     ${selected
-      ? 'bg-[#EF9F27] border-[#EF9F27] text-[#1a1a18]'
-      : 'bg-[#2c2c2a] border-[#3a3a38] text-[#A3A199] hover:border-[#BA7517] hover:text-[#F1EFE8]'
+      ? 'bg-brand border-brand text-ink'
+      : 'bg-surface border-line text-muted hover:border-brand hover:text-cream'
     }
   `
 }
@@ -31,8 +32,7 @@ function selectClass(selected: boolean) {
   return `${pillClass(selected)} appearance-none pr-8 bg-no-repeat bg-[length:12px] bg-[right_12px_center]`
 }
 
-const CHEVRON =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23A3A199' stroke-width='1.5'/%3E%3C/svg%3E\")"
+const CHEVRON = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='${encodeURIComponent(colors.muted)}' stroke-width='1.5'/%3E%3C/svg%3E")`
 
 export default function FilterPills({ filters, areas, onChange, nearMe = false, onToggleNearMe }: Props) {
   return (

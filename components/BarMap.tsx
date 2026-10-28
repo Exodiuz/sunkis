@@ -9,6 +9,7 @@ import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Zap } from 'lucide-react'
 import type { Bar } from '@/lib/supabase'
+import { colors } from '@/lib/theme'
 import type { LatLng } from '@/lib/geo'
 import { DARK_MAP_BACKGROUND, MAP_STYLES, mapThemeFromDocument, type MapTheme } from '@/lib/mapStyle'
 import { getCurrentPrice, getComparablePrice, formatSize } from '@/lib/happyHour'
@@ -24,10 +25,10 @@ type Props = {
 // Väljer pin-färg baserat på pris per 40 cl
 function getPinColor(bar: Bar): string {
   const price = getComparablePrice(bar)
-  if (!price) return '#A3A199'      // grå = pris saknas
-  if (price < 35) return '#4ade80'  // grön = under 35 kr
-  if (price <= 55) return '#facc15' // gul = 35–55 kr
-  return '#f87171'                  // röd = över 55 kr
+  if (!price) return colors.muted       // grå = pris saknas
+  if (price < 35) return colors.success  // grön = under 35 kr
+  if (price <= 55) return colors.warning // gul = 35–55 kr
+  return colors.danger                   // röd = över 55 kr
 }
 
 // Escapar text som stoppas in i popupens HTML — namn kommer från anonyma inskick
@@ -78,19 +79,19 @@ function toGeoJSON(bars: Bar[]): GeoJSON.FeatureCollection<GeoJSON.Point, { id: 
 function createPopupHtml(bar: Bar): string {
   const { price, size, isHappyHour } = getCurrentPrice(bar)
   return `
-    <div style="font-family: var(--font-inter), sans-serif; min-width: 160px;">
-      <strong style="color: #F1EFE8; font-size: 14px;">${escapeHtml(bar.name)}</strong>
-      ${bar.area ? `<div style="color: #A3A199; font-size: 14px; margin-top: 2px;">${escapeHtml(bar.area)}</div>` : ''}
+    <div style="font-family: var(--font-sans), sans-serif; min-width: 160px;">
+      <strong style="color: var(--color-cream); font-family: var(--font-display), sans-serif; font-size: 16px;">${escapeHtml(bar.name)}</strong>
+      ${bar.area ? `<div style="color: var(--color-muted); font-size: 14px; margin-top: 2px;">${escapeHtml(bar.area)}</div>` : ''}
       <div style="margin-top: 8px;">
         ${price
-          ? `<span style="color: ${isHappyHour ? '#4ade80' : '#EF9F27'}; font-size: 20px; font-weight: 500;">${price} kr</span>
-             <span style="color: #A3A199; font-size: 14px;"> · ${formatSize(size)}</span>`
-          : '<span style="color: #A3A199; font-size: 14px; font-style: italic;">Pris saknas</span>'
+          ? `<span style="color: var(${isHappyHour ? '--color-success' : '--color-brand-light'}); font-family: var(--font-mono), monospace; font-size: 20px; font-weight: 700;">${price} kr</span>
+             <span style="color: var(--color-muted); font-size: 14px;"> · ${formatSize(size)}</span>`
+          : '<span style="color: var(--color-muted); font-size: 14px; font-style: italic;">Pris saknas</span>'
         }
-        ${isHappyHour ? '<div style="color: #4ade80; font-size: 14px; margin-top: 2px;">Happy hour just nu!</div>' : ''}
+        ${isHappyHour ? '<div style="color: var(--color-success); font-size: 14px; margin-top: 2px;">Happy hour just nu!</div>' : ''}
       </div>
       <a href="/bar/${encodeURIComponent(bar.id)}"
-         style="display: inline-flex; align-items: center; min-height: 44px; color: #EF9F27; font-size: 14px; text-decoration: underline;">
+         style="display: inline-flex; align-items: center; min-height: 44px; color: var(--color-brand-light); font-size: 14px; text-decoration: underline;">
         Visa detaljer →
       </a>
     </div>
@@ -171,10 +172,10 @@ export default function BarMap({ bars, userPosition = null, centerRequest = 0 }:
         source: 'bars',
         filter: ['has', 'point_count'],
         paint: {
-          'circle-color': '#EF9F27',
+          'circle-color': colors.brand.DEFAULT,
           'circle-radius': ['step', ['get', 'point_count'], 18, 10, 24, 50, 30],
           'circle-stroke-width': 2,
-          'circle-stroke-color': '#1a1a18',
+          'circle-stroke-color': colors.ink,
         },
       })
       map.addLayer({
@@ -187,7 +188,7 @@ export default function BarMap({ bars, userPosition = null, centerRequest = 0 }:
           'text-font': ['Noto Sans Bold'],
           'text-size': 14,
         },
-        paint: { 'text-color': '#1a1a18' },
+        paint: { 'text-color': colors.ink },
       })
     })
 
@@ -265,18 +266,18 @@ export default function BarMap({ bars, userPosition = null, centerRequest = 0 }:
       <div ref={containerRef} className="w-full h-full rounded-xl overflow-hidden" />
 
       {/* Förklaring av nålarna */}
-      <div className="absolute bottom-10 left-4 z-10 bg-[#2c2c2a]/90 backdrop-blur-sm rounded-lg p-3 text-sm space-y-1.5 border border-[#3a3a38]">
+      <div className="absolute bottom-10 left-4 z-10 bg-surface/90 backdrop-blur-sm rounded-lg p-3 text-sm space-y-1.5 border border-line">
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-[#4ade80]" /> Under 35 kr
+          <span className="w-3 h-3 rounded-full bg-success" /> Under 35 kr
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-[#facc15]" /> 35–55 kr
+          <span className="w-3 h-3 rounded-full bg-warning" /> 35–55 kr
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-[#f87171]" /> Över 55 kr
+          <span className="w-3 h-3 rounded-full bg-danger" /> Över 55 kr
         </div>
         <div className="flex items-center gap-2">
-          <Zap aria-hidden="true" className="w-3.5 h-3.5 text-[#F1EFE8]" /> Happy hour nu
+          <Zap aria-hidden="true" className="w-3.5 h-3.5 text-cream" /> Happy hour nu
         </div>
       </div>
     </div>

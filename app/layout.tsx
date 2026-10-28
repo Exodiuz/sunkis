@@ -1,15 +1,31 @@
 // Global layout — laddas för alla sidor
-// Laddar Inter-fonten från Google Fonts och sätter metadata
+// Laddar varumärkets typsnitt via next/font och sätter metadata (V1)
 
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Bricolage_Grotesque, Schibsted_Grotesk, Space_Mono } from 'next/font/google'
 import './globals.css'
 import BottomNav from '@/components/BottomNav'
+import { colors } from '@/lib/theme'
 
-// Inter-fonten med svenska tecken
-const inter = Inter({
+// Rubriker och logga
+const display = Bricolage_Grotesque({
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-display',
+  display: 'swap',
+})
+
+// Brödtext
+const sans = Schibsted_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+})
+
+// Priser
+const mono = Space_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-mono',
   display: 'swap',
 })
 
@@ -29,7 +45,7 @@ export const metadata: Metadata = {
 
 // Viewport och themeColor måste exporteras separat i Next.js 14+
 export const viewport: Viewport = {
-  themeColor: '#1a1a18',
+  themeColor: colors.ink,
   width: 'device-width',
   initialScale: 1,
 }
@@ -40,13 +56,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="sv" className={inter.variable}>
+    <html lang="sv" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
       <head>
         {/* Favicon — SVG-ikonen som genererades av scripts/generate-icons.js */}
         <link rel="icon" href="/icons/icon-192.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
       </head>
-      <body className="font-sans antialiased min-h-screen bg-[#1a1a18] text-[#F1EFE8]">
+      <body className="font-sans antialiased min-h-screen bg-ink text-cream">
         {children}
         <BottomNav />
       </body>

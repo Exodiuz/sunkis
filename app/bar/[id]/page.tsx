@@ -58,18 +58,18 @@ export default async function BarPage({ params }: Props) {
   const openingHours = bar.opening_hours as Record<string, string> | null
 
   return (
-    <div className="min-h-screen bg-[#1a1a18]">
+    <div className="min-h-screen bg-ink">
       {/* Header */}
-      <header className="bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
+      <header className="bg-ink/95 backdrop-blur-sm border-b border-surface">
         <div className="max-w-2xl mx-auto px-4 py-1 flex items-center gap-3">
-          <Link href="/" className="inline-flex items-center min-h-[44px] text-[#A3A199] hover:text-[#EF9F27] transition-colors">
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-muted hover:text-brand-light transition-colors">
             <ArrowLeft aria-hidden="true" className="w-4 h-4 mr-1" />
             Tillbaka
           </Link>
-          <span className="text-[#3a3a38]">/</span>
-          <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-medium">
-            <span className="text-[#EF9F27]">sunk</span>
-            <span className="text-[#F5C55B]">is</span>
+          <span className="text-line">/</span>
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-display font-bold">
+            <span className="text-brand">sunk</span>
+            <span className="text-teal">is</span>
           </Link>
         </div>
       </header>
@@ -86,7 +86,7 @@ export default async function BarPage({ params }: Props) {
               sizes="(max-width: 672px) 100vw, 672px"
             />
             {/* Gradient för bättre läsbarhet av text ovanpå bild */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a18]/80 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/80 to-transparent" />
           </div>
         )}
 
@@ -94,16 +94,16 @@ export default async function BarPage({ params }: Props) {
         <div className="space-y-2">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-medium text-[#F1EFE8]">{bar.name}</h1>
-              {bar.area && <p className="text-[#A3A199]">{bar.area}</p>}
-              {bar.address && <p className="text-sm text-[#A3A199] mt-0.5">{bar.address}</p>}
+              <h1 className="font-display text-2xl font-medium text-cream">{bar.name}</h1>
+              {bar.area && <p className="text-muted">{bar.area}</p>}
+              {bar.address && <p className="text-sm text-muted mt-0.5">{bar.address}</p>}
               <OpenStatus bar={bar} renderedAt={Date.now()} className="text-sm mt-1 inline-block" />
             </div>
             {/* Google-betyg om det finns */}
             {bar.google_rating && (
-              <div className="flex-shrink-0 text-center bg-[#2c2c2a] rounded-lg px-3 py-2">
-                <div className="text-[#EF9F27] font-medium">{bar.google_rating.toFixed(1)}</div>
-                <div className="text-sm text-[#A3A199]">Google</div>
+              <div className="flex-shrink-0 text-center bg-surface rounded-lg px-3 py-2">
+                <div className="text-brand-light font-medium">{bar.google_rating.toFixed(1)}</div>
+                <div className="text-sm text-muted">Google</div>
               </div>
             )}
           </div>
@@ -113,31 +113,31 @@ export default async function BarPage({ params }: Props) {
         </div>
 
         {/* Priser */}
-        <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-3">
-          <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Priser</h2>
+        <div className="bg-surface rounded-xl p-4 space-y-3">
+          <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Priser</h2>
 
           <div className="flex flex-wrap gap-4">
             {/* 40cl */}
             {bar.price_40cl && (
               <div>
-                <div className="text-3xl font-medium text-[#EF9F27]">{bar.price_40cl} kr</div>
-                <div className="text-sm text-[#A3A199]">40 cl</div>
+                <div className="font-mono text-3xl font-bold text-brand-light">{bar.price_40cl} kr</div>
+                <div className="text-sm text-muted">40 cl</div>
               </div>
             )}
             {/* 50cl */}
             {bar.price_50cl && (
               <div>
-                <div className="text-3xl font-medium text-[#EF9F27]">{bar.price_50cl} kr</div>
-                <div className="text-sm text-[#A3A199]">50 cl</div>
+                <div className="font-mono text-3xl font-bold text-brand-light">{bar.price_50cl} kr</div>
+                <div className="text-sm text-muted">50 cl</div>
               </div>
             )}
             {/* Happy hour */}
             {bar.happy_hour_price && (
               <div>
-                <div className={`text-3xl font-medium ${hhActive ? 'text-[#4ade80]' : 'text-[#F1EFE8]'}`}>
+                <div className={`font-mono text-3xl font-bold ${hhActive ? 'text-success' : 'text-cream'}`}>
                   {bar.happy_hour_price} kr
                 </div>
-                <div className="text-sm text-[#A3A199]">
+                <div className="text-sm text-muted">
                   {formatSize(bar.happy_hour_size || '40cl')} · Happy hour {formatHappyHourTime(bar)}
                 </div>
               </div>
@@ -146,7 +146,7 @@ export default async function BarPage({ params }: Props) {
 
           {/* Happy hour-info */}
           {bar.happy_hour_price && (
-            <div className="text-sm text-[#A3A199] pt-1">
+            <div className="text-sm text-muted pt-1">
               Happy hour: {formatHappyHourTime(bar)} på {formatHappyHourDays(bar.happy_hour_days)}
             </div>
           )}
@@ -154,25 +154,25 @@ export default async function BarPage({ params }: Props) {
           {/* Verifiering och färskhet (D3) */}
           <div className="flex items-center gap-2 flex-wrap pt-1">
             {bar.price_verified ? (
-              <span className="inline-flex items-center gap-1 text-sm text-[#4ade80]"><Check aria-hidden="true" className="w-4 h-4" /> Prisverifierat</span>
+              <span className="inline-flex items-center gap-1 text-sm text-success"><Check aria-hidden="true" className="w-4 h-4" /> Prisverifierat</span>
             ) : (
-              <span className="text-sm text-[#A3A199]">Ej verifierat</span>
+              <span className="text-sm text-muted">Ej verifierat</span>
             )}
             <PriceFreshness bar={bar} className="text-sm" />
           </div>
         </div>
 
         {/* Sunkfaktor */}
-        <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-3">
-          <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Sunkfaktor</h2>
+        <div className="bg-surface rounded-xl p-4 space-y-3">
+          <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Sunkfaktor</h2>
           <SunkFactor score={bar.sunk_factor} votes={bar.sunk_votes} barId={bar.id} />
           {/* Förklaring av skalan (B2) */}
-          <details className="text-sm text-[#A3A199]">
-            <summary className="cursor-pointer min-h-[44px] flex items-center text-[#EF9F27]">Vad betyder sunkfaktor?</summary>
+          <details className="text-sm text-muted">
+            <summary className="cursor-pointer min-h-[44px] flex items-center text-brand-light">Vad betyder sunkfaktor?</summary>
             <ul className="space-y-1 pt-1">
               {SUNK_LEVELS.map(level => (
                 <li key={level.score}>
-                  <span className="text-[#F1EFE8]">{level.score} – {level.label}:</span> {level.description}
+                  <span className="text-cream">{level.score} – {level.label}:</span> {level.description}
                 </li>
               ))}
             </ul>
@@ -180,7 +180,7 @@ export default async function BarPage({ params }: Props) {
         </div>
 
         {/* Stämmer priset? */}
-        <div className="bg-[#2c2c2a] rounded-xl p-4">
+        <div className="bg-surface rounded-xl p-4">
           <PriceVote
             barId={bar.id}
             thumbsUp={bar.price_thumbs_up}
@@ -190,8 +190,8 @@ export default async function BarPage({ params }: Props) {
 
         {/* Öppettider */}
         {openingHours && Object.keys(openingHours).length > 0 && (
-          <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-3">
-            <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Öppettider</h2>
+          <div className="bg-surface rounded-xl p-4 space-y-3">
+            <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Öppettider</h2>
             <OpeningHours hours={openingHours} renderedAt={Date.now()} />
           </div>
         )}
@@ -204,7 +204,7 @@ export default async function BarPage({ params }: Props) {
               href={bar.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#A3A199] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
+              className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-surface border border-line rounded-lg text-sm text-muted hover:text-brand-light hover:border-brand transition-colors"
             >
               <Globe aria-hidden="true" className="w-4 h-4" />
               Webbplats
@@ -215,7 +215,7 @@ export default async function BarPage({ params }: Props) {
           {bar.phone && (
             <a
               href={`tel:${bar.phone}`}
-              className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#A3A199] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
+              className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-surface border border-line rounded-lg text-sm text-muted hover:text-brand-light hover:border-brand transition-colors"
             >
               <Phone aria-hidden="true" className="w-4 h-4" />
               {bar.phone}
@@ -226,7 +226,7 @@ export default async function BarPage({ params }: Props) {
         {/* Tillbaka-knapp */}
         <Link
           href="/"
-          className="inline-flex items-center min-h-[44px] text-sm text-[#A3A199] hover:text-[#EF9F27] transition-colors"
+          className="inline-flex items-center min-h-[44px] text-sm text-muted hover:text-brand-light transition-colors"
         >
           <ArrowLeft aria-hidden="true" className="w-4 h-4 mr-1" />
           Tillbaka till listan

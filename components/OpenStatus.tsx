@@ -22,7 +22,7 @@ export default function OpenStatus({ bar, now, renderedAt, className = 'text-sm'
   if (!label) return null
 
   return (
-    <span className={`${className} inline-flex items-center gap-1 ${status.isOpen ? 'text-[#4ade80]' : 'text-[#f87171]'}`}>
+    <span className={`${className} inline-flex items-center gap-1 ${status.isOpen ? 'text-success' : 'text-danger'}`}>
       <Clock aria-hidden="true" className="w-4 h-4 flex-shrink-0" />
       {label}
     </span>

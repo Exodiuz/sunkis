@@ -29,7 +29,7 @@ export default function DirectionsButton({ lat, lng }: Props) {
         href={directionsUrl(lat, lng, app)}
         target="_blank"
         rel="noopener noreferrer"
-        className="pointer-events-auto max-w-2xl mx-auto flex items-center justify-center gap-2 min-h-[52px] rounded-full bg-[#EF9F27] text-[#1a1a18] font-medium shadow-lg hover:bg-[#F5C55B] transition-colors"
+        className="pointer-events-auto max-w-2xl mx-auto flex items-center justify-center gap-2 min-h-[52px] rounded-full bg-brand text-ink font-medium shadow-lg hover:bg-brand-light transition-colors"
       >
         <Navigation aria-hidden="true" className="w-5 h-5" />
         Vägbeskrivning

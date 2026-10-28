@@ -164,16 +164,16 @@ export default function SubmitPage() {
   // Tack-sida efter inskick
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#1a1a18] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-ink flex items-center justify-center px-4">
         <div className="text-center max-w-sm space-y-4">
-          <Beer aria-hidden="true" className="w-12 h-12 mx-auto text-[#EF9F27]" />
-          <h1 className="text-2xl font-medium text-[#F1EFE8]">Tack!</h1>
-          <p className="text-[#A3A199]">
+          <Beer aria-hidden="true" className="w-12 h-12 mx-auto text-brand-light" />
+          <h1 className="font-display text-2xl font-medium text-cream">Tack!</h1>
+          <p className="text-muted">
             Baren har skickats in och granskas av admin. Den syns i listan och på kartan så fort priset är verifierat.
           </p>
           <Link
             href="/"
-            className="inline-block mt-4 px-6 py-3 bg-[#BA7517] text-[#1a1a18] rounded-xl font-medium hover:bg-[#EF9F27] transition-colors"
+            className="inline-block mt-4 px-6 py-3 bg-brand text-ink rounded-xl font-medium hover:bg-brand-light transition-colors"
           >
             Tillbaka till listan
           </Link>
@@ -183,36 +183,36 @@ export default function SubmitPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1a18]">
+    <div className="min-h-screen bg-ink">
       {/* Header */}
-      <header className="bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
+      <header className="bg-ink/95 backdrop-blur-sm border-b border-surface">
         <div className="max-w-2xl mx-auto px-4 py-1 flex items-center gap-3">
-          <Link href="/" className="inline-flex items-center min-h-[44px] text-[#A3A199] hover:text-[#EF9F27] transition-colors">
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-muted hover:text-brand-light transition-colors">
             <ArrowLeft aria-hidden="true" className="w-4 h-4 mr-1" />
             Tillbaka
           </Link>
-          <span className="text-[#3a3a38]">/</span>
-          <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-medium">
-            <span className="text-[#EF9F27]">sunk</span>
-            <span className="text-[#F5C55B]">is</span>
+          <span className="text-line">/</span>
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-display font-bold">
+            <span className="text-brand">sunk</span>
+            <span className="text-teal">is</span>
           </Link>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-6">
-        <h1 className="text-xl font-medium text-[#F1EFE8] mb-1">Lägg till en bar</h1>
-        <p className="text-sm text-[#A3A199] mb-6">
+        <h1 className="font-display text-xl font-medium text-cream mb-1">Lägg till en bar</h1>
+        <p className="text-sm text-muted mb-6">
           Hjälp andra hitta billigt öl — fyll i vad du vet.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Grundinfo */}
-          <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-4">
-            <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Grundinfo</h2>
+          <div className="bg-surface rounded-xl p-4 space-y-4">
+            <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Grundinfo</h2>
 
             <div>
-              <label htmlFor="bar-name" className="block text-sm text-[#A3A199] mb-1">
-                Barens namn <span className="text-[#f87171]">*</span>
+              <label htmlFor="bar-name" className="block text-sm text-muted mb-1">
+                Barens namn <span className="text-danger">*</span>
               </label>
               <input
                 id="bar-name"
@@ -220,7 +220,7 @@ export default function SubmitPage() {
                 value={name}
                 onChange={e => { setName(e.target.value); setDuplicates([]); setDuplicatesConfirmed(false) }}
                 placeholder="t.ex. The International Bar"
-                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:border-[#BA7517] transition-colors"
+                className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream placeholder-muted text-sm focus:border-brand transition-colors"
               />
             </div>
 
@@ -239,12 +239,12 @@ export default function SubmitPage() {
             />
 
             <div>
-              <label htmlFor="bar-area" className="block text-sm text-[#A3A199] mb-1">Stadsdel</label>
+              <label htmlFor="bar-area" className="block text-sm text-muted mb-1">Stadsdel</label>
               <select
                 id="bar-area"
                 value={area}
                 onChange={e => setArea(e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:border-[#BA7517] transition-colors"
+                className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream text-sm focus:border-brand transition-colors"
               >
                 <option value="">Välj stadsdel</option>
                 {/* Områden från datan (F3); ett område från adressökningen läggs till om det saknas */}
@@ -256,12 +256,12 @@ export default function SubmitPage() {
           </div>
 
           {/* Priser */}
-          <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-4">
-            <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Priser</h2>
+          <div className="bg-surface rounded-xl p-4 space-y-4">
+            <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Priser</h2>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="price-40" className="block text-sm text-[#A3A199] mb-1">40cl (kr)</label>
+                <label htmlFor="price-40" className="block text-sm text-muted mb-1">40cl (kr)</label>
                 <input
                 id="price-40"
                   type="number"
@@ -270,11 +270,11 @@ export default function SubmitPage() {
                   placeholder="t.ex. 35"
                   min="1"
                   max="999"
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream placeholder-muted text-sm focus:border-brand transition-colors"
                 />
               </div>
               <div>
-                <label htmlFor="price-50" className="block text-sm text-[#A3A199] mb-1">50cl (kr)</label>
+                <label htmlFor="price-50" className="block text-sm text-muted mb-1">50cl (kr)</label>
                 <input
                 id="price-50"
                   type="number"
@@ -283,19 +283,19 @@ export default function SubmitPage() {
                   placeholder="t.ex. 45"
                   min="1"
                   max="999"
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream placeholder-muted text-sm focus:border-brand transition-colors"
                 />
               </div>
             </div>
           </div>
 
           {/* Happy hour */}
-          <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-4">
-            <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Happy hour (valfritt)</h2>
+          <div className="bg-surface rounded-xl p-4 space-y-4">
+            <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Happy hour (valfritt)</h2>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="hh-price" className="block text-sm text-[#A3A199] mb-1">Happy hour-pris (kr)</label>
+                <label htmlFor="hh-price" className="block text-sm text-muted mb-1">Happy hour-pris (kr)</label>
                 <input
                 id="hh-price"
                   type="number"
@@ -304,16 +304,16 @@ export default function SubmitPage() {
                   placeholder="t.ex. 25"
                   min="1"
                   max="999"
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream placeholder-muted text-sm focus:border-brand transition-colors"
                 />
               </div>
               <div>
-                <label htmlFor="hh-size" className="block text-sm text-[#A3A199] mb-1">Storlek</label>
+                <label htmlFor="hh-size" className="block text-sm text-muted mb-1">Storlek</label>
                 <select
                 id="hh-size"
                   value={hhSize}
                   onChange={e => setHhSize(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream text-sm focus:border-brand transition-colors"
                 >
                   <option value="33cl">33 cl</option>
                   <option value="40cl">40 cl</option>
@@ -324,30 +324,30 @@ export default function SubmitPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="hh-start" className="block text-sm text-[#A3A199] mb-1">Starttid</label>
+                <label htmlFor="hh-start" className="block text-sm text-muted mb-1">Starttid</label>
                 <input
                 id="hh-start"
                   type="time"
                   value={hhStart}
                   onChange={e => setHhStart(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream text-sm focus:border-brand transition-colors"
                 />
               </div>
               <div>
-                <label htmlFor="hh-end" className="block text-sm text-[#A3A199] mb-1">Sluttid</label>
+                <label htmlFor="hh-end" className="block text-sm text-muted mb-1">Sluttid</label>
                 <input
                 id="hh-end"
                   type="time"
                   value={hhEnd}
                   onChange={e => setHhEnd(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:border-[#BA7517] transition-colors"
+                  className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream text-sm focus:border-brand transition-colors"
                 />
               </div>
             </div>
 
             {/* Dagar för happy hour */}
             <div>
-              <p id="hh-days-label" className="block text-sm text-[#A3A199] mb-2">Dagar</p>
+              <p id="hh-days-label" className="block text-sm text-muted mb-2">Dagar</p>
               <div className="flex gap-2 flex-wrap" role="group" aria-labelledby="hh-days-label">
                 {WEEKDAYS.map(({ value, label }) => (
                   <button
@@ -357,8 +357,8 @@ export default function SubmitPage() {
                     aria-pressed={hhDays.includes(value)}
                     className={`min-h-[44px] min-w-[44px] px-3 rounded-lg text-sm border transition-colors ${
                       hhDays.includes(value)
-                        ? 'bg-[#EF9F27] border-[#EF9F27] text-[#1a1a18]'
-                        : 'bg-[#1a1a18] border-[#3a3a38] text-[#A3A199]'
+                        ? 'bg-brand border-brand text-ink'
+                        : 'bg-ink border-line text-muted'
                     }`}
                   >
                     {label}
@@ -369,10 +369,10 @@ export default function SubmitPage() {
           </div>
 
           {/* Sunkfaktor */}
-          <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-3">
-            <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Sunkfaktor</h2>
-            <p className="text-sm text-[#A3A199]">
-              Hur sunkigt är det? <span className="text-[#F1EFE8]">{SUNK_LEVELS[sunkFactor - 1].label}</span>
+          <div className="bg-surface rounded-xl p-4 space-y-3">
+            <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Sunkfaktor</h2>
+            <p className="text-sm text-muted">
+              Hur sunkigt är det? <span className="text-cream">{SUNK_LEVELS[sunkFactor - 1].label}</span>
             </p>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map(n => (
@@ -384,8 +384,8 @@ export default function SubmitPage() {
                   aria-label={`Sunkfaktor ${n} av 5: ${SUNK_LEVELS[n - 1].label}`}
                   className={`w-11 h-11 rounded-full border-2 transition-all text-sm font-medium ${
                     sunkFactor >= n
-                      ? 'bg-[#EF9F27] border-[#EF9F27] text-[#1a1a18]'
-                      : 'bg-transparent border-[#3a3a38] text-[#A3A199]'
+                      ? 'bg-brand border-brand text-ink'
+                      : 'bg-transparent border-line text-muted'
                   }`}
                 >
                   {n}
@@ -396,27 +396,27 @@ export default function SubmitPage() {
 
           {/* Trolig dubblett (C4) */}
           {duplicates.length > 0 && !duplicatesConfirmed && (
-            <div role="alert" className="px-4 py-3 bg-[#facc15]/10 border border-[#facc15]/40 rounded-lg space-y-3">
-              <p className="text-sm text-[#F1EFE8]">
+            <div role="alert" className="px-4 py-3 bg-warning/10 border border-warning/40 rounded-lg space-y-3">
+              <p className="text-sm text-cream">
                 {duplicates.length === 1 ? 'Den här baren verkar redan finnas:' : 'De här barerna verkar redan finnas:'}
               </p>
               <ul className="space-y-1">
                 {duplicates.map(d => (
                   <li key={d.id}>
-                    <Link href={`/bar/${d.id}`} className="inline-flex items-center min-h-[44px] text-sm text-[#EF9F27] underline underline-offset-2">
+                    <Link href={`/bar/${d.id}`} className="inline-flex items-center min-h-[44px] text-sm text-brand-light underline underline-offset-2">
                       {d.name}{d.address || d.area ? ` – ${d.address ?? d.area}` : ''}
                     </Link>
                   </li>
                 ))}
               </ul>
-              <p className="text-sm text-[#A3A199]">
+              <p className="text-sm text-muted">
                 Är det samma bar? Öppna den och rösta på priset i stället. Är det en annan bar kan du skicka in ändå.
               </p>
               <button
                 type="button"
                 disabled={loading}
                 onClick={() => { setDuplicatesConfirmed(true); submit(true) }}
-                className="min-h-[44px] px-4 rounded-lg border border-[#3a3a38] text-sm text-[#F1EFE8] hover:border-[#BA7517]"
+                className="min-h-[44px] px-4 rounded-lg border border-line text-sm text-cream hover:border-brand"
               >
                 Det är en annan bar – skicka in
               </button>
@@ -425,7 +425,7 @@ export default function SubmitPage() {
 
           {/* Felmeddelande */}
           {error && (
-            <div className="px-4 py-3 bg-[#f87171]/10 border border-[#f87171]/30 rounded-lg text-sm text-[#f87171]">
+            <div className="px-4 py-3 bg-danger/10 border border-danger/30 rounded-lg text-sm text-danger">
               {error}
             </div>
           )}
@@ -434,7 +434,7 @@ export default function SubmitPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-[#BA7517] hover:bg-[#EF9F27] text-[#1a1a18] rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 bg-brand hover:bg-brand-light text-ink rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Skickar...' : 'Skicka in baren'}
           </button>

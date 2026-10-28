@@ -26,12 +26,12 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
   const priceUncertain = bar.price_thumbs_down >= 5
 
   return (
-    <div className="relative flex flex-col bg-[#2c2c2a] rounded-xl border border-[#3a3a38] overflow-hidden hover:border-[#BA7517]/50 transition-colors">
+    <div className="relative flex flex-col bg-surface rounded-xl border border-line overflow-hidden hover:border-brand/50 transition-colors">
       <div className="flex items-stretch gap-0">
         {/* Ranknummer — vänster kantkolumn, bara för barer med pris */}
         {rank !== undefined && price !== null && (
-          <div className="flex items-center justify-center w-12 bg-[#232321] flex-shrink-0">
-            <span className="text-lg font-medium text-[#A3A199]">#{rank}</span>
+          <div className="flex items-center justify-center w-12 bg-sunken flex-shrink-0">
+            <span className="text-lg font-medium text-muted">#{rank}</span>
           </div>
         )}
 
@@ -42,19 +42,19 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
             <div className="min-w-0">
               <Link
                 href={`/bar/${bar.id}`}
-                className="hover:text-[#EF9F27] transition-colors after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-[#F5C55B]"
+                className="hover:text-brand-light transition-colors after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-teal"
               >
-                <h2 className="font-medium text-[#F1EFE8] truncate">{bar.name}</h2>
+                <h2 className="font-display font-medium text-cream truncate">{bar.name}</h2>
               </Link>
 
               {/* Stadsdel */}
-              {bar.area && <p className="text-sm text-[#A3A199] mt-0.5">{bar.area}</p>}
+              {bar.area && <p className="text-sm text-muted mt-0.5">{bar.area}</p>}
 
               {/* "Öppet till 01:00 · 600 m" — ikon + text (L3) */}
               <div className="flex items-center gap-x-2 gap-y-1 mt-1 flex-wrap">
                 <OpenStatus bar={bar} now={now} />
                 {distance !== null && (
-                  <span className="inline-flex items-center gap-1 text-sm text-[#A3A199]">
+                  <span className="inline-flex items-center gap-1 text-sm text-muted">
                     <span aria-hidden="true">·</span>
                     <MapPin aria-hidden="true" className="w-4 h-4" />
                     {formatDistance(distance)}
@@ -65,7 +65,7 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
 
               {/* Happy hour-tider om de finns men inte aktiva */}
               {bar.happy_hour_price && !hhActive && (
-                <p className="text-sm text-[#A3A199] mt-0.5">
+                <p className="text-sm text-muted mt-0.5">
                   HH {formatHappyHourTime(bar)}: {bar.happy_hour_price} kr · {formatSize(bar.happy_hour_size || '40cl')}
                 </p>
               )}
@@ -76,27 +76,27 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
               {price ? (
                 <>
                   <div className="whitespace-nowrap">
-                    <span className={`text-2xl font-medium ${isHappyHour ? 'text-[#4ade80]' : 'text-[#EF9F27]'}`}>
+                    <span className={`font-mono text-2xl font-bold ${isHappyHour ? 'text-success' : 'text-brand-light'}`}>
                       {price} kr
                     </span>
-                    <span className="text-sm text-[#A3A199]"> · {formatSize(size)}</span>
+                    <span className="text-sm text-muted"> · {formatSize(size)}</span>
                   </div>
                   {/* Varning om priset är osäkert */}
                   {priceUncertain && (
-                    <div className="text-sm text-[#facc15]" title="Många har rapporterat felaktigt pris">
+                    <div className="text-sm text-warning" title="Många har rapporterat felaktigt pris">
                       <TriangleAlert aria-hidden="true" className="inline w-4 h-4 -mt-0.5 mr-1" />
                       Osäkert
                     </div>
                   )}
                 </>
               ) : (
-                <div className="text-sm text-[#A3A199] italic">Pris saknas</div>
+                <div className="text-sm text-muted italic">Pris saknas</div>
               )}
             </div>
           </div>
 
           {/* Botten: sunkfaktor och prisets färskhet */}
-          <div className="flex items-center justify-between gap-2 flex-wrap mt-2 pt-2 border-t border-[#3a3a38]">
+          <div className="flex items-center justify-between gap-2 flex-wrap mt-2 pt-2 border-t border-line">
             <SunkFactor score={bar.sunk_factor} size="sm" />
             <PriceFreshness bar={bar} now={now} />
           </div>

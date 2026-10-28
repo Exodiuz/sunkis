@@ -21,14 +21,14 @@ export default function OpeningHours({ hours, renderedAt }: Props) {
           key={day.day}
           aria-current={day.isToday ? 'date' : undefined}
           className={`flex justify-between text-sm rounded-lg px-2 py-1.5 -mx-2 ${
-            day.isToday ? 'bg-[#3a3a38] font-medium' : ''
+            day.isToday ? 'bg-line font-medium' : ''
           }`}
         >
-          <dt className={day.isToday ? 'text-[#F1EFE8]' : 'text-[#A3A199]'}>
+          <dt className={day.isToday ? 'text-cream' : 'text-muted'}>
             {day.label}
             {day.isToday && <span className="sr-only"> (i dag)</span>}
           </dt>
-          <dd className={day.closed ? 'text-[#f87171]' : 'text-[#F1EFE8]'}>{day.hours}</dd>
+          <dd className={day.closed ? 'text-danger' : 'text-cream'}>{day.hours}</dd>
         </div>
       ))}
     </dl>

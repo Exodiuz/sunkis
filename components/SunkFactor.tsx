@@ -97,10 +97,10 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
           const circle = (
             <span className={`${circleSize} relative block rounded-full overflow-hidden`}>
               {/* Tom cirkel som bakgrund */}
-              <span className="absolute inset-0 rounded-full border border-[#A3A199]" />
+              <span className="absolute inset-0 rounded-full border border-muted" />
               {/* Fylld del — täcker cirkeln baserat på fill-värdet */}
               <span
-                className="absolute inset-0 rounded-full bg-[#EF9F27]"
+                className="absolute inset-0 rounded-full bg-brand"
                 style={{ clipPath: `inset(0 ${100 - fill * 100}% 0 0)` }}
               />
             </span>
@@ -129,7 +129,7 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
         })}
 
         {/* Poäng och ord bredvid cirklarna, eller "Inga röster än" */}
-        <span className="text-sm text-[#A3A199] ml-1" aria-hidden="true">
+        <span className="text-sm text-muted ml-1" aria-hidden="true">
           {hovered
             ? word
             : hasVotes
@@ -140,23 +140,23 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
 
       {/* Visa antal röster om angiven */}
       {localVotes !== undefined && localVotes > 0 && (
-        <span className="text-sm text-[#A3A199]">
+        <span className="text-sm text-muted">
           {localVotes} {localVotes === 1 ? 'röst' : 'röster'}
         </span>
       )}
 
       {/* Användarens egen röst och bekräftelse efter röstning */}
       {barId && ownVote && (
-        <span className="text-sm text-[#A3A199]">Din röst: {ownVote.score} av 5</span>
+        <span className="text-sm text-muted">Din röst: {ownVote.score} av 5</span>
       )}
       {justVoted && (
-        <span className="text-sm text-[#4ade80]">Tack för din röst!</span>
+        <span className="text-sm text-success">Tack för din röst!</span>
       )}
       {failed && (
-        <span className="text-sm text-[#f87171]">Rösten kunde inte sparas. Försök igen.</span>
+        <span className="text-sm text-danger">Rösten kunde inte sparas. Försök igen.</span>
       )}
       {alreadyVoted && !ownVote && (
-        <span className="text-sm text-[#A3A199]">Du har redan röstat här i dag.</span>
+        <span className="text-sm text-muted">Du har redan röstat här i dag.</span>
       )}
     </div>
   )

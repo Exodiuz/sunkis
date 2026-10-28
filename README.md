@@ -115,7 +115,7 @@ Styling:    Tailwind CSS + CSS-variabler
 Karta:      MapLibre GL + OpenFreeMap (open source, ingen nyckel)
 Databas:    Supabase (PostgreSQL, gratis tier)
 Hosting:    Vercel (gratis)
-Font:       Inter via Google Fonts
+Typsnitt:   Bricolage Grotesque, Schibsted Grotesk, Space Mono (next/font)
 Data:       Google Places API (Nearby Search + Place Details)
 ```
 
