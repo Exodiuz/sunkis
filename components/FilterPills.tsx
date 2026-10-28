@@ -20,10 +20,13 @@ type Props = {
   onToggleNearMe?: () => void // utelämnas när positionen inte går att använda
 }
 
-// Tidsfilter visas först, sedan "Nära mig", sist områden
-const TIME_FILTERS: { label: string; value: Filter }[] = [
+// "Alla" och "Öppet nu" först, sedan "Nära mig" så att kärnflödet syns utan scroll
+const LEAD_FILTERS: { label: string; value: Filter }[] = [
   { label: 'Alla', value: 'alla' },
   { label: '🟢 Öppet nu', value: 'öppet-nu' },
+]
+
+const TIME_FILTERS: { label: string; value: Filter }[] = [
   { label: '⚡ Happy hour nu', value: 'happy-hour-nu' },
 ]
 
@@ -62,13 +65,14 @@ export default function FilterPills({ active, onChange, nearMe = false, onToggle
   return (
     // Horisontell scrollbar på mobil
     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4">
-      {TIME_FILTERS.map(pill)}
+      {LEAD_FILTERS.map(pill)}
       {/* Nära mig kombineras med övriga filter — frågar om position vid första tryck */}
       {onToggleNearMe && (
         <button type="button" aria-pressed={nearMe} onClick={onToggleNearMe} className={pillClass(nearMe)}>
           📍 Nära mig
         </button>
       )}
+      {TIME_FILTERS.map(pill)}
       {AREA_FILTERS.map(pill)}
     </div>
   )

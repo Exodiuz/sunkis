@@ -71,6 +71,14 @@ body {
 }
 
 @layer utilities {
+  /* Dölj scrollbaren i horisontella pillrader (scrollen fungerar ändå) */
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   .text-balance {
     text-wrap: balance;
   }
