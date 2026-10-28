@@ -129,7 +129,7 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
         })}
 
         {/* Poäng och ord bredvid cirklarna, eller "Inga röster än" */}
-        <span className="text-xs text-[#A3A199] ml-1" aria-hidden="true">
+        <span className="text-sm text-[#A3A199] ml-1" aria-hidden="true">
           {hovered
             ? word
             : hasVotes
@@ -140,23 +140,23 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
 
       {/* Visa antal röster om angiven */}
       {localVotes !== undefined && localVotes > 0 && (
-        <span className="text-xs text-[#A3A199]">
+        <span className="text-sm text-[#A3A199]">
           {localVotes} {localVotes === 1 ? 'röst' : 'röster'}
         </span>
       )}
 
       {/* Användarens egen röst och bekräftelse efter röstning */}
       {barId && ownVote && (
-        <span className="text-xs text-[#A3A199]">Din röst: {ownVote.score} av 5</span>
+        <span className="text-sm text-[#A3A199]">Din röst: {ownVote.score} av 5</span>
       )}
       {justVoted && (
-        <span className="text-xs text-[#4ade80]">Tack för din röst!</span>
+        <span className="text-sm text-[#4ade80]">Tack för din röst!</span>
       )}
       {failed && (
-        <span className="text-xs text-[#f87171]">Rösten kunde inte sparas. Försök igen.</span>
+        <span className="text-sm text-[#f87171]">Rösten kunde inte sparas. Försök igen.</span>
       )}
       {alreadyVoted && !ownVote && (
-        <span className="text-xs text-[#A3A199]">Du har redan röstat här i dag.</span>
+        <span className="text-sm text-[#A3A199]">Du har redan röstat här i dag.</span>
       )}
     </div>
   )

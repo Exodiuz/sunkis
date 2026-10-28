@@ -10,7 +10,7 @@ type Props = {
   className?: string
 }
 
-export default function PriceFreshness({ bar, now, className = 'text-xs' }: Props) {
+export default function PriceFreshness({ bar, now, className = 'text-sm' }: Props) {
   const { stale, label } = getFreshness(bar, now)
   return (
     <span className={`${className} text-[#A3A199]`}>

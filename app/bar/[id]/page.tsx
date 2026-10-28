@@ -110,7 +110,7 @@ export default async function BarPage({ params }: Props) {
             {bar.google_rating && (
               <div className="flex-shrink-0 text-center bg-[#2c2c2a] rounded-lg px-3 py-2">
                 <div className="text-[#EF9F27] font-medium">{bar.google_rating.toFixed(1)}</div>
-                <div className="text-xs text-[#A3A199]">Google</div>
+                <div className="text-sm text-[#A3A199]">Google</div>
               </div>
             )}
           </div>
@@ -128,14 +128,14 @@ export default async function BarPage({ params }: Props) {
             {bar.price_40cl && (
               <div>
                 <div className="text-3xl font-medium text-[#EF9F27]">{bar.price_40cl} kr</div>
-                <div className="text-xs text-[#A3A199]">40 cl</div>
+                <div className="text-sm text-[#A3A199]">40 cl</div>
               </div>
             )}
             {/* 50cl */}
             {bar.price_50cl && (
               <div>
                 <div className="text-3xl font-medium text-[#EF9F27]">{bar.price_50cl} kr</div>
-                <div className="text-xs text-[#A3A199]">50 cl</div>
+                <div className="text-sm text-[#A3A199]">50 cl</div>
               </div>
             )}
             {/* Happy hour */}
@@ -144,7 +144,7 @@ export default async function BarPage({ params }: Props) {
                 <div className={`text-3xl font-medium ${hhActive ? 'text-[#4ade80]' : 'text-[#F1EFE8]'}`}>
                   {bar.happy_hour_price} kr
                 </div>
-                <div className="text-xs text-[#A3A199]">
+                <div className="text-sm text-[#A3A199]">
                   {formatSize(bar.happy_hour_size || '40cl')} · Happy hour {formatHappyHourTime(bar)}
                 </div>
               </div>

@@ -14,7 +14,7 @@ type Props = {
   className?: string
 }
 
-export default function OpenStatus({ bar, now, renderedAt, className = 'text-xs' }: Props) {
+export default function OpenStatus({ bar, now, renderedAt, className = 'text-sm' }: Props) {
   const ownNow = useNow(renderedAt ?? Date.now())
   const status = getOpenStatus(bar, now ?? ownNow)
   const label = formatOpenStatus(status)

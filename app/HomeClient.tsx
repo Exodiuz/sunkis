@@ -178,7 +178,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
       <main className="max-w-2xl mx-auto px-4 pb-8">
         {/* Statistikrad */}
         <div className="flex items-center justify-between py-2 mb-3">
-          <p className="text-xs text-[#A3A199]">
+          <p className="text-sm text-[#A3A199]">
             {filteredBars.length} {filteredBars.length === 1 ? 'bar' : 'barer'} hittades
           </p>
           {(hasActiveFilters(filters) || nearMeActive) && (

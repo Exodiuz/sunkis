@@ -82,7 +82,7 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
           <span className="text-xl">👍</span>
           <div className="text-left">
             <div className="text-sm font-medium text-[#F1EFE8]">Ja, stämmer!</div>
-            <div className="text-xs text-[#A3A199]">{localUp} röster</div>
+            <div className="text-sm text-[#A3A199]">{localUp} röster</div>
           </div>
         </button>
 
@@ -94,7 +94,7 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
           <span className="text-xl">👎</span>
           <div className="text-left">
             <div className="text-sm font-medium text-[#F1EFE8]">Nej, fel pris</div>
-            <div className="text-xs text-[#A3A199]">{localDown} röster</div>
+            <div className="text-sm text-[#A3A199]">{localDown} röster</div>
           </div>
         </button>
       </div>
