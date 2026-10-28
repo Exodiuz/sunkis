@@ -12,6 +12,7 @@ import { saveOwnSunkVote } from '@/lib/votes'
 import { SUNK_LEVELS } from '@/lib/sunk'
 import type { GeocodeResult } from '@/lib/geocode'
 import { distinctAreas } from '@/lib/areas'
+import { boundingBox, findDuplicates } from '@/lib/duplicates'
 import AddressSearch from '@/components/AddressSearch'
 
 // Alla veckodagar för happy hour-val
@@ -25,12 +26,24 @@ const WEEKDAYS = [
   { value: 'sunday', label: 'Sön' },
 ]
 
+type DuplicateBar = {
+  id: string
+  name: string
+  area: string | null
+  address: string | null
+  lat: number | null
+  lng: number | null
+}
+
 export default function SubmitPage() {
   // Formulärstate
   const [name, setName] = useState('')
   const [address, setAddress] = useState('')
   const [area, setArea] = useState('')
   const [place, setPlace] = useState<GeocodeResult | null>(null)
+  // Troliga dubbletter och om användaren bekräftat att det är en ny bar (C4)
+  const [duplicates, setDuplicates] = useState<DuplicateBar[]>([])
+  const [duplicatesConfirmed, setDuplicatesConfirmed] = useState(false)
   const [areas, setAreas] = useState<string[]>(() => distinctAreas([]))
 
   // Hämta områden som finns bland barerna (F3)
@@ -61,9 +74,39 @@ export default function SubmitPage() {
     )
   }
 
+  // Letar efter befintliga barer med liknande namn inom 50 m (C4)
+  async function lookForDuplicates(): Promise<DuplicateBar[]> {
+    const columns = 'id, name, area, address, lat, lng'
+    const escaped = name.trim().replace(/[\\%_]/g, ch => `\\${ch}`)
+    const queries = [supabase.from('bars').select(columns).ilike('name', escaped).limit(10)]
+    if (place) {
+      const box = boundingBox(place.lat, place.lng)
+      queries.push(
+        supabase.from('bars').select(columns)
+          .gte('lat', box.minLat).lte('lat', box.maxLat)
+          .gte('lng', box.minLng).lte('lng', box.maxLng)
+          .limit(25),
+      )
+    }
+    const results = await Promise.all(queries)
+    const rows = new Map<string, DuplicateBar>()
+    for (const { data, error: queryError } of results) {
+      if (queryError) console.error('Dubblettkontroll misslyckades:', queryError)
+      for (const row of (data ?? []) as DuplicateBar[]) rows.set(row.id, row)
+    }
+    return findDuplicates(
+      { name: name.trim(), lat: place?.lat ?? null, lng: place?.lng ?? null },
+      Array.from(rows.values()),
+    )
+  }
+
   // Skickar formuläret till Supabase
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    await submit(duplicatesConfirmed)
+  }
+
+  async function submit(skipDuplicateCheck: boolean) {
     setError('')
 
     if (!name.trim()) {
@@ -73,6 +116,15 @@ export default function SubmitPage() {
 
     setLoading(true)
     try {
+      // Dubblettkontroll (C4) — hoppas över när användaren sagt att det är en ny bar
+      if (!skipDuplicateCheck) {
+        const found = await lookForDuplicates()
+        if (found.length > 0) {
+          setDuplicates(found)
+          return
+        }
+      }
+
       const { data: inserted, error: dbError } = await supabase.from('bars').insert({
         name: name.trim(),
         address: address.trim() || null,
@@ -166,7 +218,7 @@ export default function SubmitPage() {
                 id="bar-name"
                 type="text"
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={e => { setName(e.target.value); setDuplicates([]); setDuplicatesConfirmed(false) }}
                 placeholder="t.ex. The International Bar"
                 className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:border-[#BA7517] transition-colors"
               />
@@ -176,7 +228,7 @@ export default function SubmitPage() {
             <AddressSearch
               value={address}
               selected={place}
-              onChange={text => { setAddress(text); setPlace(null) }}
+              onChange={text => { setAddress(text); setPlace(null); setDuplicates([]); setDuplicatesConfirmed(false) }}
               onSelect={chosen => {
                 setPlace(chosen)
                 // Visa gatuadressen utan barens namn i fältet
@@ -341,6 +393,35 @@ export default function SubmitPage() {
               ))}
             </div>
           </div>
+
+          {/* Trolig dubblett (C4) */}
+          {duplicates.length > 0 && !duplicatesConfirmed && (
+            <div role="alert" className="px-4 py-3 bg-[#facc15]/10 border border-[#facc15]/40 rounded-lg space-y-3">
+              <p className="text-sm text-[#F1EFE8]">
+                {duplicates.length === 1 ? 'Den här baren verkar redan finnas:' : 'De här barerna verkar redan finnas:'}
+              </p>
+              <ul className="space-y-1">
+                {duplicates.map(d => (
+                  <li key={d.id}>
+                    <Link href={`/bar/${d.id}`} className="inline-flex items-center min-h-[44px] text-sm text-[#EF9F27] underline underline-offset-2">
+                      {d.name}{d.address || d.area ? ` – ${d.address ?? d.area}` : ''}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-sm text-[#A3A199]">
+                Är det samma bar? Öppna den och rösta på priset i stället. Är det en annan bar kan du skicka in ändå.
+              </p>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => { setDuplicatesConfirmed(true); submit(true) }}
+                className="min-h-[44px] px-4 rounded-lg border border-[#3a3a38] text-sm text-[#F1EFE8] hover:border-[#BA7517]"
+              >
+                Det är en annan bar – skicka in
+              </button>
+            </div>
+          )}
 
           {/* Felmeddelande */}
           {error && (
