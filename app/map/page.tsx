@@ -1,11 +1,11 @@
-// Kartsidan — visar alla barer med Leaflet.js
-// Dynamisk import används för att undvika SSR-fel med Leaflet
+// Kartsidan — visar alla barer med MapLibre GL
+// Dynamisk import används för att undvika SSR-fel med MapLibre
 
 import { supabase } from '@/lib/supabase'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 
-// Ladda kartan dynamiskt (inget SSR — Leaflet kräver window-objekt)
+// Ladda kartan dynamiskt (inget SSR — MapLibre kräver window-objekt)
 const BarMap = dynamic(() => import('@/components/BarMap'), {
   ssr: false,
   loading: () => (

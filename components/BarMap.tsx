@@ -1,11 +1,18 @@
-// BarMap — Leaflet.js-karta med pins för alla barer
-// Laddas dynamiskt med 'use client' och 'dynamic' för att undvika SSR-fel
+// BarMap — MapLibre GL-karta med pins för alla barer
+// Kartbild från OpenFreeMap (vektor, ingen API-nyckel), se docs/kartval.md
+// Laddas med next/dynamic och ssr: false eftersom MapLibre kräver window
 
 'use client'
 
 import { useEffect, useRef } from 'react'
+import maplibregl from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import type { Bar } from '@/lib/supabase'
 import { getCurrentPrice, getComparablePrice, formatSize } from '@/lib/happyHour'
+
+// Mörk stil som matchar appens tema
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/dark'
+const STOCKHOLM: [number, number] = [18.0686, 59.3293] // lng, lat
 
 type Props = {
   bars: Bar[]
@@ -30,7 +37,7 @@ function escapeHtml(text: string): string {
 // Skapar en SVG-pin-ikon med given färg
 function createPinIcon(color: string): string {
   return `
-    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36" aria-hidden="true">
       <path d="M14 0C6.27 0 0 6.27 0 14c0 9.33 14 22 14 22s14-12.67 14-22C28 6.27 21.73 0 14 0z"
         fill="${color}" stroke="#1a1a18" stroke-width="1.5"/>
       <circle cx="14" cy="14" r="6" fill="#1a1a18" opacity="0.5"/>
@@ -38,111 +45,86 @@ function createPinIcon(color: string): string {
   `
 }
 
+// Popup-innehåll med bar-info
+function createPopupHtml(bar: Bar): string {
+  const { price, size, isHappyHour } = getCurrentPrice(bar)
+  return `
+    <div style="font-family: var(--font-inter), sans-serif; min-width: 160px;">
+      <strong style="color: #F1EFE8; font-size: 14px;">${escapeHtml(bar.name)}</strong>
+      ${bar.area ? `<div style="color: #A3A199; font-size: 14px; margin-top: 2px;">${escapeHtml(bar.area)}</div>` : ''}
+      <div style="margin-top: 8px;">
+        ${price
+          ? `<span style="color: ${isHappyHour ? '#4ade80' : '#EF9F27'}; font-size: 20px; font-weight: 500;">${price} kr</span>
+             <span style="color: #A3A199; font-size: 14px;"> · ${formatSize(size)}</span>`
+          : '<span style="color: #A3A199; font-size: 14px; font-style: italic;">Pris saknas</span>'
+        }
+        ${isHappyHour ? '<div style="color: #4ade80; font-size: 14px; margin-top: 2px;">Happy hour just nu!</div>' : ''}
+      </div>
+      <a href="/bar/${encodeURIComponent(bar.id)}"
+         style="display: inline-flex; align-items: center; min-height: 44px; color: #EF9F27; font-size: 14px; text-decoration: underline;">
+        Visa detaljer →
+      </a>
+    </div>
+  `
+}
+
 export default function BarMap({ bars }: Props) {
-  const mapRef = useRef<HTMLDivElement>(null)
-  // Håller referens till Leaflet-instansen för att undvika dubbel-init
-  const leafletRef = useRef<unknown>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<maplibregl.Map | null>(null)
+  const markersRef = useRef<maplibregl.Marker[]>([])
 
+  // Skapa kartan en gång
   useEffect(() => {
-    // Leaflet måste laddas client-side (fönster-objekt behövs)
-    if (typeof window === 'undefined') return
-    if (leafletRef.current) return // redan initierad
+    if (!containerRef.current || mapRef.current) return
 
-    // Dynamisk import av Leaflet
-    import('leaflet').then((L) => {
-      if (!mapRef.current) return
-      if ((mapRef.current as HTMLElement & { _leaflet_id?: number })._leaflet_id) return
-
-      // Fixa Leaflet-ikonernas sökvägar (Next.js-problem)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (L.Icon.Default.prototype as any)._getIconUrl
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      })
-
-      // Initiera kartan centrerad på Stockholm
-      const map = L.map(mapRef.current, {
-        center: [59.3293, 18.0686],
-        zoom: 13,
-        zoomControl: true,
-      })
-
-      // OpenStreetMap-tiles (gratis, ingen API-nyckel)
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19,
-      }).addTo(map)
-
-      // Lägg till pins för varje bar
-      bars.forEach((bar) => {
-        if (!bar.lat || !bar.lng) return
-
-        const color = getPinColor(bar)
-        const { price, size, isHappyHour } = getCurrentPrice(bar)
-
-        // Anpassad SVG-ikon i en träffyta på 44 × 44 px
-        const icon = L.divIcon({
-          html: `<span style="display:flex;align-items:flex-end;justify-content:center;width:44px;height:44px;">${createPinIcon(color)}</span>`,
-          iconSize: [44, 44],
-          iconAnchor: [22, 44],
-          popupAnchor: [0, -40],
-          className: '', // töm klassen för att undvika Leaflet-standard-bakgrund
-        })
-
-        // Popup-innehåll med bar-info
-        const popupContent = `
-          <div style="font-family: Inter, sans-serif; min-width: 160px;">
-            <strong style="color: #F1EFE8; font-size: 14px;">${escapeHtml(bar.name)}</strong>
-            ${bar.area ? `<div style="color: #A3A199; font-size: 12px; margin-top: 2px;">${escapeHtml(bar.area)}</div>` : ''}
-            <div style="margin-top: 8px;">
-              ${price
-                ? `<span style="color: ${isHappyHour ? '#4ade80' : '#EF9F27'}; font-size: 20px; font-weight: 500;">${price} kr</span>
-                   <span style="color: #A3A199; font-size: 12px;"> · ${formatSize(size)}</span>`
-                : '<span style="color: #A3A199; font-size: 13px; font-style: italic;">Pris saknas</span>'
-              }
-              ${isHappyHour ? '<div style="color: #4ade80; font-size: 12px; margin-top: 2px;">⚡ Happy hour just nu!</div>' : ''}
-            </div>
-            <a href="/bar/${encodeURIComponent(bar.id)}"
-               style="display: inline-block; margin-top: 8px; color: #EF9F27; font-size: 12px; text-decoration: underline;">
-              Visa detaljer →
-            </a>
-          </div>
-        `
-
-        // title ger nålen ett tillgängligt namn för skärmläsare
-        const label = price ? `${bar.name}, ${price} kr för ${formatSize(size)}` : `${bar.name}, pris saknas`
-        L.marker([bar.lat, bar.lng], { icon, title: label, alt: label, keyboard: true })
-          .addTo(map)
-          .bindPopup(popupContent)
-      })
-
-      leafletRef.current = map
+    const map = new maplibregl.Map({
+      container: containerRef.current,
+      style: MAP_STYLE,
+      center: STOCKHOLM,
+      zoom: 13,
+      attributionControl: { compact: false },
     })
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
+    mapRef.current = map
 
     // Städa upp kartan när komponenten avmonteras
     return () => {
-      if (leafletRef.current) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;(leafletRef.current as any).remove()
-        leafletRef.current = null
-      }
+      map.remove()
+      mapRef.current = null
     }
+  }, [])
+
+  // Rita om pins när barerna ändras (t.ex. nya filter) utan att bygga om kartan
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    markersRef.current.forEach(marker => marker.remove())
+    markersRef.current = bars
+      .filter(bar => bar.lat !== null && bar.lng !== null)
+      .map(bar => {
+        const { price, size } = getCurrentPrice(bar)
+
+        // Pinnen är en knapp med 44 × 44 px träffyta och tillgängligt namn
+        const el = document.createElement('button')
+        el.type = 'button'
+        el.className = 'sunkis-pin'
+        el.setAttribute('aria-label', price ? `${bar.name}, ${price} kr för ${formatSize(size)}` : `${bar.name}, pris saknas`)
+        el.innerHTML = createPinIcon(getPinColor(bar))
+
+        return new maplibregl.Marker({ element: el, anchor: 'bottom' })
+          .setLngLat([bar.lng as number, bar.lat as number])
+          .setPopup(new maplibregl.Popup({ offset: 40, closeButton: true }).setHTML(createPopupHtml(bar)))
+          .addTo(map)
+      })
   }, [bars])
 
   return (
     <div className="relative w-full h-full">
-      {/* Leaflet CSS — laddas inline för att undvika SSR-problem */}
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        crossOrigin=""
-      />
-      <div ref={mapRef} className="w-full h-full rounded-xl" />
+      <div ref={containerRef} className="w-full h-full rounded-xl overflow-hidden" />
 
       {/* Förklaring av pin-färger */}
-      <div className="absolute bottom-4 left-4 z-[1000] bg-[#2c2c2a]/90 backdrop-blur-sm rounded-lg p-3 text-xs space-y-1.5 border border-[#3a3a38]">
+      <div className="absolute bottom-10 left-4 z-10 bg-[#2c2c2a]/90 backdrop-blur-sm rounded-lg p-3 text-sm space-y-1.5 border border-[#3a3a38]">
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-[#4ade80]" /> Under 35 kr
         </div>

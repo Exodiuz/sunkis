@@ -24,7 +24,7 @@ Sunkis hjälper dig hitta det billigaste ölet på bar i Stockholm. Community-dr
 | Feature | Beskrivning |
 |---------|-------------|
 | 🏆 **Rankinglista** | Barer sorterade billigast → dyrast med rank, pris och sunkfaktor |
-| 🗺️ **Karta** | Leaflet.js med färgkodade pins — grön/gul/röd beroende på pris |
+| 🗺️ **Karta** | MapLibre GL + OpenFreeMap med färgkodade pins — grön/gul/röd beroende på pris |
 | ⚡ **Happy hour** | Visar rätt pris baserat på aktuell tid i Stockholm |
 | 👍 **Prisröstning** | Community verifierar om priset stämmer |
 | ⭐ **Sunkfaktor** | 1–5 cirklar — hur sunkigt är det egentligen? |
@@ -112,7 +112,7 @@ Sunkis hjälper dig hitta det billigaste ölet på bar i Stockholm. Community-dr
 ```
 Frontend:   Next.js 14 (App Router) + TypeScript
 Styling:    Tailwind CSS + CSS-variabler
-Karta:      Leaflet.js (open source)
+Karta:      MapLibre GL + OpenFreeMap (open source, ingen nyckel)
 Databas:    Supabase (PostgreSQL, gratis tier)
 Hosting:    Vercel (gratis)
 Font:       Inter via Google Fonts
@@ -219,14 +219,14 @@ sunkis/
 ├── app/
 │   ├── page.tsx              ← startsida (SSR)
 │   ├── HomeClient.tsx        ← filter + sökning (klient)
-│   ├── map/page.tsx          ← Leaflet-karta
+│   ├── map/page.tsx          ← MapLibre-karta
 │   ├── bar/[id]/page.tsx     ← detaljsida
 │   ├── submit/page.tsx       ← lägg till bar
 │   ├── admin/page.tsx        ← admin-panel
 │   └── api/admin/auth/       ← login-endpoint
 ├── components/
 │   ├── BarCard.tsx           ← kort i rankinglistan
-│   ├── BarMap.tsx            ← Leaflet-kartan
+│   ├── BarMap.tsx            ← MapLibre-kartan
 │   ├── FilterPills.tsx       ← filterknappar
 │   ├── PriceVote.tsx         ← 👍/👎
 │   ├── SunkFactor.tsx        ← 1–5 cirklar
