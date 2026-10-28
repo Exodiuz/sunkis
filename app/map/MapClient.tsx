@@ -3,12 +3,12 @@
 
 'use client'
 
-import { List, Plus, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import type { Bar } from '@/lib/supabase'
-import { applyFilters, filtersToQueryString, hasActiveFilters, type BarFilters } from '@/lib/filters'
+import { applyFilters, hasActiveFilters, type BarFilters } from '@/lib/filters'
 import { SUNK_LEVELS } from '@/lib/sunk'
 import { useNow } from '@/lib/useNow'
 import { useUrlFilters } from '@/lib/useUrlFilters'
@@ -69,7 +69,7 @@ export default function MapClient({ bars, renderedAt }: Props) {
   }, [wantsCenter, location.position])
 
   return (
-    <div className="flex flex-col h-screen bg-[#1a1a18]">
+    <div className="flex flex-col h-[calc(100dvh-4rem-env(safe-area-inset-bottom))] bg-[#1a1a18]">
       {/* Header */}
       <header className="flex-shrink-0 bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
         <div className="max-w-screen-xl mx-auto px-4 py-1 flex items-center justify-between">
@@ -81,17 +81,6 @@ export default function MapClient({ bars, renderedAt }: Props) {
             <span className="text-[#A3A199] text-sm hidden sm:block">
               {visible.length} barer på kartan
             </span>
-          </div>
-          <div className="flex items-center gap-1 text-sm -mr-2">
-            {/* Tillbaka till listan med samma filter */}
-            <Link href={`/${filtersToQueryString(filters)}`} className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-              <List aria-hidden="true" className="w-4 h-4 mr-1" />
-              Lista
-            </Link>
-            <Link href="/submit" className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-              <Plus aria-hidden="true" className="w-4 h-4 mr-1" />
-              Lägg till
-            </Link>
           </div>
         </div>
 

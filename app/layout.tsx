@@ -4,6 +4,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import BottomNav from '@/components/BottomNav'
 
 // Inter-fonten med svenska tecken
 const inter = Inter({
@@ -47,6 +48,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased min-h-screen bg-[#1a1a18] text-[#F1EFE8]">
         {children}
+        <BottomNav />
       </body>
     </html>
   )

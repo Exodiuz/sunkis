@@ -3,13 +3,13 @@
 
 'use client'
 
-import { Map as MapIcon, Plus, Search, X, Beer, ArrowRight } from 'lucide-react'
+import { Search, X, Beer, ArrowRight } from 'lucide-react'
 import { useState, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import type { Bar } from '@/lib/supabase'
 import { getComparablePrice } from '@/lib/happyHour'
 import { distinctAreas } from '@/lib/areas'
-import { applyFilters, filtersToQueryString, hasActiveFilters } from '@/lib/filters'
+import { applyFilters, hasActiveFilters } from '@/lib/filters'
 import { useUrlFilters } from '@/lib/useUrlFilters'
 import { useNow } from '@/lib/useNow'
 import { distanceToBar } from '@/lib/geo'
@@ -101,17 +101,6 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
               <span className="text-[#F5C55B]">is</span>
             </Link>
 
-            {/* Navigation */}
-            <nav className="flex items-center gap-1 text-sm -mr-2">
-              <Link href={`/map${filtersToQueryString(filters)}`} className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-                <MapIcon aria-hidden="true" className="w-4 h-4" />
-                <span className="ml-1">Karta</span>
-              </Link>
-              <Link href="/submit" className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-                <Plus aria-hidden="true" className="w-4 h-4" />
-                <span className="ml-1">Lägg till</span>
-              </Link>
-            </nav>
           </div>
           <p className="text-[#A3A199] text-sm">Billigaste ölet i Stockholm</p>
         </div>
