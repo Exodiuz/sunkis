@@ -7,6 +7,7 @@ import { createClient } from '@supabase/supabase-js'
 export type Bar = {
   id: string
   google_place_id: string | null
+  osm_id: string | null            // "node/123" från adressökningen (C1)
   name: string
   address: string | null
   area: string | null

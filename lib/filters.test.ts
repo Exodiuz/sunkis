@@ -15,7 +15,7 @@ const now = new Date('2026-10-28T18:00:00+01:00')
 function bar(overrides: Partial<Bar>): Bar {
   return {
     id: overrides.name ?? 'x',
-    google_place_id: null, name: 'Bar', address: null, area: 'Södermalm', lat: null, lng: null,
+    google_place_id: null, osm_id: null, name: 'Bar', address: null, area: 'Södermalm', lat: null, lng: null,
     opening_hours: { wednesday: '15:00–01:00' }, google_rating: null, photo_url: null, website: null,
     phone: null, price_40cl: 40, price_50cl: null, happy_hour_price: null, happy_hour_start: null,
     happy_hour_end: null, happy_hour_days: null, happy_hour_size: null, sunk_factor: 3, sunk_votes: 4,

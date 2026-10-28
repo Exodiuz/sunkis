@@ -9,6 +9,8 @@ import { supabase } from '@/lib/supabase'
 import { getDeviceId } from '@/lib/deviceId'
 import { saveOwnSunkVote } from '@/lib/votes'
 import { SUNK_LEVELS } from '@/lib/sunk'
+import type { GeocodeResult } from '@/lib/geocode'
+import AddressSearch from '@/components/AddressSearch'
 
 // Alla veckodagar för happy hour-val
 const WEEKDAYS = [
@@ -26,6 +28,7 @@ export default function SubmitPage() {
   const [name, setName] = useState('')
   const [address, setAddress] = useState('')
   const [area, setArea] = useState('')
+  const [place, setPlace] = useState<GeocodeResult | null>(null)
   const [price40, setPrice40] = useState('')
   const [price50, setPrice50] = useState('')
   const [hhPrice, setHhPrice] = useState('')
@@ -63,6 +66,9 @@ export default function SubmitPage() {
         name: name.trim(),
         address: address.trim() || null,
         area: area || null,
+        lat: place?.lat ?? null,
+        lng: place?.lng ?? null,
+        osm_id: place?.osmId ?? null,
         price_40cl: price40 ? parseInt(price40) : null,
         price_50cl: price50 ? parseInt(price50) : null,
         happy_hour_price: hhPrice ? parseInt(hhPrice) : null,
@@ -153,16 +159,19 @@ export default function SubmitPage() {
               />
             </div>
 
-            <div>
-              <label className="block text-sm text-[#A3A199] mb-1">Adress</label>
-              <input
-                type="text"
-                value={address}
-                onChange={e => setAddress(e.target.value)}
-                placeholder="t.ex. Folkungagatan 84"
-                className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:outline-none focus:border-[#BA7517] transition-colors"
-              />
-            </div>
+            {/* Adress med platssökning — sparar koordinater och osm-id (C1) */}
+            <AddressSearch
+              value={address}
+              selected={place}
+              onChange={text => { setAddress(text); setPlace(null) }}
+              onSelect={chosen => {
+                setPlace(chosen)
+                // Visa gatuadressen utan barens namn i fältet
+                setAddress(chosen.name ? chosen.label.replace(`${chosen.name}, `, '') : chosen.label)
+                if (chosen.area) setArea(chosen.area)
+                if (!name.trim() && chosen.name) setName(chosen.name)
+              }}
+            />
 
             <div>
               <label className="block text-sm text-[#A3A199] mb-1">Stadsdel</label>
