@@ -31,17 +31,31 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
-/* Kartnålar — knapp med 44 × 44 px träffyta, nålen i botten */
-.sunkis-pin {
+/* Prisnålar (K2) — knapp med minst 44 × 44 px träffyta runt en prisetikett */
+.sunkis-price-pin {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  width: 44px;
+  min-width: 44px;
   height: 44px;
   padding: 0;
   background: none;
   border: 0;
   cursor: pointer;
+}
+.sunkis-price-pin__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  border: 2px solid #1a1a18;
+  color: #1a1a18;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 /* Användarens position (K3) */
