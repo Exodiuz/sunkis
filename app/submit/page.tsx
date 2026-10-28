@@ -149,10 +149,11 @@ export default function SubmitPage() {
             <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Grundinfo</h2>
 
             <div>
-              <label className="block text-sm text-[#A3A199] mb-1">
+              <label htmlFor="bar-name" className="block text-sm text-[#A3A199] mb-1">
                 Barens namn <span className="text-[#f87171]">*</span>
               </label>
               <input
+                id="bar-name"
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
@@ -176,8 +177,9 @@ export default function SubmitPage() {
             />
 
             <div>
-              <label className="block text-sm text-[#A3A199] mb-1">Stadsdel</label>
+              <label htmlFor="bar-area" className="block text-sm text-[#A3A199] mb-1">Stadsdel</label>
               <select
+                id="bar-area"
                 value={area}
                 onChange={e => setArea(e.target.value)}
                 className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:border-[#BA7517] transition-colors"
@@ -198,8 +200,9 @@ export default function SubmitPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm text-[#A3A199] mb-1">40cl (kr)</label>
+                <label htmlFor="price-40" className="block text-sm text-[#A3A199] mb-1">40cl (kr)</label>
                 <input
+                id="price-40"
                   type="number"
                   value={price40}
                   onChange={e => setPrice40(e.target.value)}
@@ -210,8 +213,9 @@ export default function SubmitPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-[#A3A199] mb-1">50cl (kr)</label>
+                <label htmlFor="price-50" className="block text-sm text-[#A3A199] mb-1">50cl (kr)</label>
                 <input
+                id="price-50"
                   type="number"
                   value={price50}
                   onChange={e => setPrice50(e.target.value)}
@@ -230,8 +234,9 @@ export default function SubmitPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm text-[#A3A199] mb-1">Happy hour-pris (kr)</label>
+                <label htmlFor="hh-price" className="block text-sm text-[#A3A199] mb-1">Happy hour-pris (kr)</label>
                 <input
+                id="hh-price"
                   type="number"
                   value={hhPrice}
                   onChange={e => setHhPrice(e.target.value)}
@@ -242,8 +247,9 @@ export default function SubmitPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-[#A3A199] mb-1">Storlek</label>
+                <label htmlFor="hh-size" className="block text-sm text-[#A3A199] mb-1">Storlek</label>
                 <select
+                id="hh-size"
                   value={hhSize}
                   onChange={e => setHhSize(e.target.value)}
                   className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:border-[#BA7517] transition-colors"
@@ -257,8 +263,9 @@ export default function SubmitPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm text-[#A3A199] mb-1">Starttid</label>
+                <label htmlFor="hh-start" className="block text-sm text-[#A3A199] mb-1">Starttid</label>
                 <input
+                id="hh-start"
                   type="time"
                   value={hhStart}
                   onChange={e => setHhStart(e.target.value)}
@@ -266,8 +273,9 @@ export default function SubmitPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-[#A3A199] mb-1">Sluttid</label>
+                <label htmlFor="hh-end" className="block text-sm text-[#A3A199] mb-1">Sluttid</label>
                 <input
+                id="hh-end"
                   type="time"
                   value={hhEnd}
                   onChange={e => setHhEnd(e.target.value)}
@@ -278,8 +286,8 @@ export default function SubmitPage() {
 
             {/* Dagar för happy hour */}
             <div>
-              <label className="block text-sm text-[#A3A199] mb-2">Dagar</label>
-              <div className="flex gap-2 flex-wrap">
+              <p id="hh-days-label" className="block text-sm text-[#A3A199] mb-2">Dagar</p>
+              <div className="flex gap-2 flex-wrap" role="group" aria-labelledby="hh-days-label">
                 {WEEKDAYS.map(({ value, label }) => (
                   <button
                     key={value}
