@@ -11,7 +11,7 @@ export type Filter =
   | 'Kungsholmen'
   | 'Vasastan'
   | 'Östermalm'
-  | 'City'
+  | 'Norrmalm'
 
 type Props = {
   active: Filter
@@ -35,7 +35,7 @@ const AREA_FILTERS: { label: string; value: Filter }[] = [
   { label: 'Kungsholmen', value: 'Kungsholmen' },
   { label: 'Vasastan', value: 'Vasastan' },
   { label: 'Östermalm', value: 'Östermalm' },
-  { label: 'City', value: 'City' },
+  { label: 'Norrmalm', value: 'Norrmalm' },
 ]
 
 function pillClass(selected: boolean) {

@@ -10,6 +10,8 @@ export type Bar = {
   name: string
   address: string | null
   area: string | null
+  tags: string[] | null            // fri märkning, finns i databasen sedan 2026-06-06
+  blurb: string | null             // kort beskrivning, finns i databasen sedan 2026-06-06
   lat: number | null
   lng: number | null
   opening_hours: Record<string, string> | null

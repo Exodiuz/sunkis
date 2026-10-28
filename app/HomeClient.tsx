@@ -77,7 +77,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
       case 'Kungsholmen':
       case 'Vasastan':
       case 'Östermalm':
-      case 'City':
+      case 'Norrmalm':
         result = result.filter(b => b.area === activeFilter)
         break
     }
