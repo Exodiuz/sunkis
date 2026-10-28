@@ -3,7 +3,7 @@
 
 'use client'
 
-import { TriangleAlert } from 'lucide-react'
+import { MapPin, TriangleAlert } from 'lucide-react'
 import Link from 'next/link'
 import type { Bar } from '@/lib/supabase'
 import { getCurrentPrice, isHappyHourActive, formatHappyHourTime, formatSize } from '@/lib/happyHour'
@@ -47,21 +47,19 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
                 <h2 className="font-medium text-[#F1EFE8] truncate">{bar.name}</h2>
               </Link>
 
-              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                {/* Stadsdel */}
-                {bar.area && (
-                  <span className="text-sm text-[#A3A199]">{bar.area}</span>
-                )}
+              {/* Stadsdel */}
+              {bar.area && <p className="text-sm text-[#A3A199] mt-0.5">{bar.area}</p>}
 
-                {/* Avstånd från användaren */}
-                {distance !== null && (
-                  <span className="text-sm text-[#A3A199]">{formatDistance(distance)}</span>
-                )}
-
-                {/* Öppet/stängt */}
+              {/* "Öppet till 01:00 · 600 m" — ikon + text (L3) */}
+              <div className="flex items-center gap-x-2 gap-y-1 mt-1 flex-wrap">
                 <OpenStatus bar={bar} now={now} />
-
-                {/* Happy hour badge */}
+                {distance !== null && (
+                  <span className="inline-flex items-center gap-1 text-sm text-[#A3A199]">
+                    <span aria-hidden="true">·</span>
+                    <MapPin aria-hidden="true" className="w-4 h-4" />
+                    {formatDistance(distance)}
+                  </span>
+                )}
                 {hhActive && <HappyHourBadge compact />}
               </div>
 
