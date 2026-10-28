@@ -4,11 +4,12 @@
 'use client'
 
 import { Clock, LocateFixed, Zap } from 'lucide-react'
-import { AREAS, MAX_PRICE_OPTIONS, MIN_SUNK_OPTIONS, type BarFilters } from '@/lib/filters'
+import { MAX_PRICE_OPTIONS, MIN_SUNK_OPTIONS, type BarFilters } from '@/lib/filters'
 import { SUNK_LEVELS } from '@/lib/sunk'
 
 type Props = {
   filters: BarFilters
+  areas: string[] // områden från datan (F3)
   onChange: (update: Partial<BarFilters>) => void
   nearMe?: boolean
   onToggleNearMe?: () => void // utelämnas när positionen inte går att använda
@@ -33,7 +34,7 @@ function selectClass(selected: boolean) {
 const CHEVRON =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23A3A199' stroke-width='1.5'/%3E%3C/svg%3E\")"
 
-export default function FilterPills({ filters, onChange, nearMe = false, onToggleNearMe }: Props) {
+export default function FilterPills({ filters, areas, onChange, nearMe = false, onToggleNearMe }: Props) {
   return (
     // Horisontell scrollbar på mobil
     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4">
@@ -99,7 +100,7 @@ export default function FilterPills({ filters, onChange, nearMe = false, onToggl
         style={{ backgroundImage: CHEVRON }}
       >
         <option value="">Alla områden</option>
-        {AREAS.map(area => (
+        {areas.map(area => (
           <option key={area} value={area}>{area}</option>
         ))}
       </select>

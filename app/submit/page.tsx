@@ -4,13 +4,14 @@
 'use client'
 
 import { ArrowLeft, Beer } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getDeviceId } from '@/lib/deviceId'
 import { saveOwnSunkVote } from '@/lib/votes'
 import { SUNK_LEVELS } from '@/lib/sunk'
 import type { GeocodeResult } from '@/lib/geocode'
+import { distinctAreas } from '@/lib/areas'
 import AddressSearch from '@/components/AddressSearch'
 
 // Alla veckodagar för happy hour-val
@@ -30,6 +31,15 @@ export default function SubmitPage() {
   const [address, setAddress] = useState('')
   const [area, setArea] = useState('')
   const [place, setPlace] = useState<GeocodeResult | null>(null)
+  const [areas, setAreas] = useState<string[]>(() => distinctAreas([]))
+
+  // Hämta områden som finns bland barerna (F3)
+  useEffect(() => {
+    supabase.from('bar_areas').select('area').then(({ data, error }) => {
+      if (error) console.error('Kunde inte hämta områden:', error)
+      else setAreas(distinctAreas((data ?? []).map(row => row.area)))
+    })
+  }, [])
   const [price40, setPrice40] = useState('')
   const [price50, setPrice50] = useState('')
   const [hhPrice, setHhPrice] = useState('')
@@ -185,11 +195,10 @@ export default function SubmitPage() {
                 className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:border-[#BA7517] transition-colors"
               >
                 <option value="">Välj stadsdel</option>
-                <option value="Södermalm">Södermalm</option>
-                <option value="Kungsholmen">Kungsholmen</option>
-                <option value="Vasastan">Vasastan</option>
-                <option value="Östermalm">Östermalm</option>
-                <option value="City">City / Norrmalm</option>
+                {/* Områden från datan (F3); ett område från adressökningen läggs till om det saknas */}
+                {(area && !areas.includes(area) ? [...areas, area] : areas).map(a => (
+                  <option key={a} value={a}>{a}</option>
+                ))}
               </select>
             </div>
           </div>

@@ -8,6 +8,7 @@ import { useState, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import type { Bar } from '@/lib/supabase'
 import { getComparablePrice } from '@/lib/happyHour'
+import { distinctAreas } from '@/lib/areas'
 import { applyFilters, filtersToQueryString, hasActiveFilters } from '@/lib/filters'
 import { useUrlFilters } from '@/lib/useUrlFilters'
 import { useNow } from '@/lib/useNow'
@@ -33,6 +34,8 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
   // Kombinerbara filter och sökning, speglade i URL:en (F2)
   const { filters, setFilters, resetFilters } = useUrlFilters()
   const searchRef = useRef<HTMLInputElement>(null)
+  // Områden från barerna i listan (F3)
+  const areas = useMemo(() => distinctAreas(bars.map(b => b.area)), [bars])
   // Sortering och "Nära mig" — position hämtas först när användaren ber om det
   const [sort, setSort] = useState<Sort>('billigast')
   const [nearMe, setNearMe] = useState(false)
@@ -133,6 +136,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
         {/* Filterpills */}
         <FilterPills
           filters={filters}
+          areas={areas}
           onChange={setFilters}
           nearMe={nearMeActive}
           onToggleNearMe={locationBlocked ? undefined : toggleNearMe}
