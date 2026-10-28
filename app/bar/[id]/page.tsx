@@ -1,7 +1,7 @@
 // Bar-detaljsida — visar all information om en specifik bar
 // Server-side rendering med dynamisk route /bar/[id]
 
-import { ArrowLeft, Check, Globe, MapPin, Phone } from 'lucide-react'
+import { ArrowLeft, Check, Globe, Phone } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -17,6 +17,7 @@ import PriceVote from '@/components/PriceVote'
 import HappyHourBadge from '@/components/HappyHourBadge'
 import OpenStatus from '@/components/OpenStatus'
 import OpeningHours from '@/components/OpeningHours'
+import DirectionsButton from '@/components/DirectionsButton'
 import PriceFreshness from '@/components/PriceFreshness'
 import { SUNK_LEVELS } from '@/lib/sunk'
 
@@ -73,7 +74,7 @@ export default async function BarPage({ params }: Props) {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-2xl mx-auto px-4 pt-6 pb-24 space-y-6">
         {/* Foto om det finns */}
         {bar.photo_url && (
           <div className="relative w-full h-52 rounded-xl overflow-hidden">
@@ -197,19 +198,6 @@ export default async function BarPage({ params }: Props) {
 
         {/* Kontakt och länkar */}
         <div className="flex flex-wrap gap-3">
-          {/* Google Maps-länk */}
-          {bar.lat && bar.lng && (
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${bar.lat},${bar.lng}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#A3A199] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
-            >
-              <MapPin aria-hidden="true" className="w-4 h-4" />
-              Öppna i Google Maps
-            </a>
-          )}
-
           {/* Webbplats */}
           {bar.website && (
             <a
@@ -244,6 +232,9 @@ export default async function BarPage({ params }: Props) {
           Tillbaka till listan
         </Link>
       </main>
+
+      {/* Vägbeskrivning i tumzonen (B3) */}
+      {bar.lat !== null && bar.lng !== null && <DirectionsButton lat={bar.lat} lng={bar.lng} />}
     </div>
   )
 }
