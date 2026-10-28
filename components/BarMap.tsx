@@ -10,10 +10,9 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { Zap } from 'lucide-react'
 import type { Bar } from '@/lib/supabase'
 import type { LatLng } from '@/lib/geo'
+import { DARK_MAP_BACKGROUND, MAP_STYLES, mapThemeFromDocument, type MapTheme } from '@/lib/mapStyle'
 import { getCurrentPrice, getComparablePrice, formatSize } from '@/lib/happyHour'
 
-// Mörk stil som matchar appens tema
-const MAP_STYLE = 'https://tiles.openfreemap.org/styles/dark'
 const STOCKHOLM: [number, number] = [18.0686, 59.3293] // lng, lat
 
 type Props = {
@@ -110,9 +109,11 @@ export default function BarMap({ bars, userPosition = null, centerRequest = 0 }:
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
 
+    // Kartstilen följer appens tema (K4)
+    let theme: MapTheme = mapThemeFromDocument(document.documentElement)
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: MAP_STYLE,
+      style: MAP_STYLES[theme],
       center: STOCKHOLM,
       zoom: 13,
       attributionControl: { compact: false },
@@ -148,7 +149,14 @@ export default function BarMap({ bars, userPosition = null, centerRequest = 0 }:
       })
     }
 
-    map.on('load', () => {
+    // Källa och klusterlager läggs till vid varje stilladdning, så att de
+    // finns kvar om stilen byts när temat ändras
+    map.on('style.load', () => {
+      if (theme === 'dark' && map.getLayer('background')) {
+        map.setPaintProperty('background', 'background-color', DARK_MAP_BACKGROUND)
+      }
+      markers.forEach(marker => marker.remove())
+      markers.clear()
       map.addSource('bars', {
         type: 'geojson',
         data: toGeoJSON(Array.from(barsByIdRef.current.values())),
@@ -181,22 +189,32 @@ export default function BarMap({ bars, userPosition = null, centerRequest = 0 }:
         },
         paint: { 'text-color': '#1a1a18' },
       })
-
-      // Tryck på kluster zoomar in tills det delar upp sig
-      map.on('click', 'bar-clusters', async event => {
-        const feature = event.features?.[0]
-        if (!feature) return
-        const source = map.getSource('bars') as maplibregl.GeoJSONSource
-        const zoom = await source.getClusterExpansionZoom(feature.properties.cluster_id)
-        map.easeTo({ center: (feature.geometry as GeoJSON.Point).coordinates as [number, number], zoom })
-      })
-      map.on('mouseenter', 'bar-clusters', () => { map.getCanvas().style.cursor = 'pointer' })
-      map.on('mouseleave', 'bar-clusters', () => { map.getCanvas().style.cursor = '' })
     })
+
+    // Tryck på kluster zoomar in tills det delar upp sig
+    map.on('click', 'bar-clusters', async event => {
+      const feature = event.features?.[0]
+      if (!feature) return
+      const source = map.getSource('bars') as maplibregl.GeoJSONSource
+      const zoom = await source.getClusterExpansionZoom(feature.properties.cluster_id)
+      map.easeTo({ center: (feature.geometry as GeoJSON.Point).coordinates as [number, number], zoom })
+    })
+    map.on('mouseenter', 'bar-clusters', () => { map.getCanvas().style.cursor = 'pointer' })
+    map.on('mouseleave', 'bar-clusters', () => { map.getCanvas().style.cursor = '' })
     map.on('render', syncMarkers)
+
+    // Byt stil om html-elementets tema ändras
+    const observer = new MutationObserver(() => {
+      const next = mapThemeFromDocument(document.documentElement)
+      if (next === theme) return
+      theme = next
+      map.setStyle(MAP_STYLES[theme], { diff: false })
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
 
     // Städa upp kartan när komponenten avmonteras
     return () => {
+      observer.disconnect()
       markers.forEach(marker => marker.remove())
       markers.clear()
       map.remove()
