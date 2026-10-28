@@ -1,5 +1,5 @@
 // BarCard — ett bar-kort i rankinglistan
-// Visar rank, namn, pris, sunkfaktor och röstningsknappar
+// Visar rank, namn, pris och sunkfaktor — röstning finns bara på detaljsidan
 
 'use client'
 
@@ -7,7 +7,6 @@ import Link from 'next/link'
 import type { Bar } from '@/lib/supabase'
 import { getCurrentPrice, isHappyHourActive, formatHappyHourTime, formatSize } from '@/lib/happyHour'
 import SunkFactor from './SunkFactor'
-import PriceVote from './PriceVote'
 import HappyHourBadge from './HappyHourBadge'
 import OpenStatus from './OpenStatus'
 
@@ -85,15 +84,9 @@ export default function BarCard({ bar, rank, now }: Props) {
             </div>
           </div>
 
-          {/* Botten: sunkfaktor och prisröstning */}
-          <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#3a3a38]">
+          {/* Botten: sunkfaktor */}
+          <div className="flex items-center mt-2 pt-2 border-t border-[#3a3a38]">
             <SunkFactor score={bar.sunk_factor} size="sm" />
-            <PriceVote
-              barId={bar.id}
-              thumbsUp={bar.price_thumbs_up}
-              thumbsDown={bar.price_thumbs_down}
-              compact
-            />
           </div>
         </div>
       </div>
