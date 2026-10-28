@@ -5,8 +5,9 @@ describe('matchArea', () => {
   it('matchar appens områden och alias', () => {
     expect(matchArea('Södermalm')).toBe('Södermalm')
     expect(matchArea(null, 'kungsholmen')).toBe('Kungsholmen')
-    expect(matchArea('Norrmalm')).toBe('City')
-    expect(matchArea('Gamla stan')).toBe('City')
+    expect(matchArea('Norrmalm')).toBe('Norrmalm')
+    expect(matchArea('City')).toBe('Norrmalm')
+    expect(matchArea('Gamla stan')).toBeNull()
     expect(matchArea('Vasastaden')).toBe('Vasastan')
     expect(matchArea('Bromma')).toBeNull()
   })
