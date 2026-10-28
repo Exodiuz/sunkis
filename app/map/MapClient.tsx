@@ -3,12 +3,12 @@
 
 'use client'
 
-import { List, Plus, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import type { Bar } from '@/lib/supabase'
-import { applyFilters, filtersToQueryString, hasActiveFilters, type BarFilters } from '@/lib/filters'
+import { applyFilters, hasActiveFilters, type BarFilters } from '@/lib/filters'
 import { SUNK_LEVELS } from '@/lib/sunk'
 import { useNow } from '@/lib/useNow'
 import { useUrlFilters } from '@/lib/useUrlFilters'
@@ -18,8 +18,8 @@ import { useUserLocation } from '@/lib/useUserLocation'
 const BarMap = dynamic(() => import('@/components/BarMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-[#2c2c2a] rounded-xl">
-      <div className="text-[#A3A199] text-sm">Laddar karta...</div>
+    <div className="w-full h-full flex items-center justify-center bg-surface rounded-xl">
+      <div className="text-muted text-sm">Laddar karta...</div>
     </div>
   ),
 })
@@ -69,42 +69,31 @@ export default function MapClient({ bars, renderedAt }: Props) {
   }, [wantsCenter, location.position])
 
   return (
-    <div className="flex flex-col h-screen bg-[#1a1a18]">
+    <div className="flex flex-col h-[calc(100dvh-4rem-env(safe-area-inset-bottom))] bg-ink">
       {/* Header */}
-      <header className="flex-shrink-0 bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
+      <header className="flex-shrink-0 bg-ink/95 backdrop-blur-sm border-b border-surface">
         <div className="max-w-screen-xl mx-auto px-4 py-1 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-medium">
-              <span className="text-[#EF9F27]">sunk</span>
-              <span className="text-[#F5C55B]">is</span>
+            <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-display font-bold">
+              <span className="text-brand">sunk</span>
+              <span className="text-teal">is</span>
             </Link>
-            <span className="text-[#A3A199] text-sm hidden sm:block">
+            <span className="text-muted text-sm hidden sm:block">
               {visible.length} barer på kartan
             </span>
-          </div>
-          <div className="flex items-center gap-1 text-sm -mr-2">
-            {/* Tillbaka till listan med samma filter */}
-            <Link href={`/${filtersToQueryString(filters)}`} className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-              <List aria-hidden="true" className="w-4 h-4 mr-1" />
-              Lista
-            </Link>
-            <Link href="/submit" className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-              <Plus aria-hidden="true" className="w-4 h-4 mr-1" />
-              Lägg till
-            </Link>
           </div>
         </div>
 
         {/* Aktiva filter från listan */}
         {active && (
           <div className="max-w-screen-xl mx-auto px-4 pb-1 flex items-center justify-between gap-2 text-sm">
-            <p className="text-[#A3A199] truncate">
-              <span className="text-[#F1EFE8]">{visible.length} av {bars.length}</span> · {describeFilters(filters)}
+            <p className="text-muted truncate">
+              <span className="text-cream">{visible.length} av {bars.length}</span> · {describeFilters(filters)}
             </p>
             <button
               type="button"
               onClick={resetFilters}
-              className="flex-shrink-0 min-h-[44px] px-2 -mr-2 text-[#EF9F27] hover:text-[#F5C55B]"
+              className="flex-shrink-0 min-h-[44px] px-2 -mr-2 text-brand-light hover:text-teal"
             >
               Rensa filter <X aria-hidden="true" className="inline w-4 h-4 -mt-0.5" />
             </button>
@@ -119,16 +108,16 @@ export default function MapClient({ bars, renderedAt }: Props) {
         {/* Centrera på mig — nere till höger, ovanför attributionen */}
         <div className="absolute right-4 bottom-12 z-10 flex flex-col items-end gap-2">
           {(location.status === 'denied' || location.status === 'unavailable') && (
-            <p role="status" className="max-w-[220px] text-right text-sm bg-[#2c2c2a]/95 border border-[#3a3a38] rounded-lg px-3 py-2 text-[#A3A199]">
+            <p role="status" className="max-w-[220px] text-right text-sm bg-surface/95 border border-line rounded-lg px-3 py-2 text-muted">
               {location.status === 'denied' ? 'Platsåtkomst är avstängd.' : 'Kunde inte hitta din position.'}
             </p>
           )}
           <button
             type="button"
             onClick={centerOnMe}
-            className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full bg-[#2c2c2a] border border-[#3a3a38] text-sm font-medium text-[#F1EFE8] shadow-lg hover:border-[#BA7517]"
+            className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full bg-surface border border-line text-sm font-medium text-cream shadow-lg hover:border-brand"
           >
-            <span aria-hidden="true" className="w-3 h-3 rounded-full bg-[#3b82f6] ring-2 ring-white" />
+            <span aria-hidden="true" className="w-3 h-3 rounded-full bg-location ring-2 ring-white" />
             {location.status === 'locating' ? 'Hämtar position…' : 'Centrera på mig'}
           </button>
         </div>

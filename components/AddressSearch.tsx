@@ -78,7 +78,7 @@ export default function AddressSearch({ value, onChange, onSelect, selected }: P
 
   return (
     <div className="relative">
-      <label htmlFor={inputId} className="block text-sm text-[#A3A199] mb-1">Adress</label>
+      <label htmlFor={inputId} className="block text-sm text-muted mb-1">Adress</label>
       <input
         id={inputId}
         type="text"
@@ -93,14 +93,14 @@ export default function AddressSearch({ value, onChange, onSelect, selected }: P
         onKeyDown={handleKeyDown}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         placeholder="Sök adress eller barens namn"
-        className="w-full px-3 py-2.5 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] placeholder-[#A3A199] text-sm focus:border-[#BA7517] transition-colors"
+        className="w-full px-3 py-2.5 bg-ink border border-line rounded-lg text-cream placeholder-muted text-sm focus:border-brand transition-colors"
       />
 
       {open && results.length > 0 && (
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-20 mt-1 w-full max-h-72 overflow-auto rounded-lg border border-[#3a3a38] bg-[#2c2c2a] shadow-lg"
+          className="absolute z-20 mt-1 w-full max-h-72 overflow-auto rounded-lg border border-line bg-surface shadow-lg"
         >
           {results.map((place, i) => (
             <li
@@ -110,7 +110,7 @@ export default function AddressSearch({ value, onChange, onSelect, selected }: P
               aria-selected={i === active}
               onMouseDown={e => { e.preventDefault(); choose(place) }}
               className={`flex items-center min-h-[44px] px-3 py-2 text-sm cursor-pointer ${
-                i === active ? 'bg-[#3a3a38] text-[#F1EFE8]' : 'text-[#F1EFE8] hover:bg-[#3a3a38]'
+                i === active ? 'bg-line text-cream' : 'text-cream hover:bg-line'
               }`}
             >
               {place.label}
@@ -119,7 +119,7 @@ export default function AddressSearch({ value, onChange, onSelect, selected }: P
         </ul>
       )}
 
-      <p className="mt-1 text-sm text-[#A3A199]" role="status">
+      <p className="mt-1 text-sm text-muted" role="status">
         {selected
           ? 'Plats vald – baren hamnar rätt på kartan.'
           : status === 'loading'

@@ -63,10 +63,10 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <h3 className="text-sm font-medium text-[#A3A199]">Stämmer priset?</h3>
+        <h3 className="text-sm font-medium text-muted">Stämmer priset?</h3>
         {priceUncertain && (
           <span
-            className="text-sm text-[#facc15]"
+            className="text-sm text-warning"
             title={`${localDown} säger att priset inte stämmer`}
           >
             <TriangleAlert aria-hidden="true" className="inline w-4 h-4 -mt-0.5 mr-1" />
@@ -79,33 +79,33 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
         <button
           onClick={() => vote('up')}
           disabled={voted || alreadyVoted || loading}
-          className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-[#2c2c2a] border border-[#3a3a38] hover:border-[#4ade80] transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-surface border border-line hover:border-success transition-colors disabled:opacity-50"
         >
-          <ThumbsUp aria-hidden="true" className="w-5 h-5 text-[#4ade80]" />
+          <ThumbsUp aria-hidden="true" className="w-5 h-5 text-success" />
           <div className="text-left">
-            <div className="text-sm font-medium text-[#F1EFE8]">Ja, stämmer!</div>
-            <div className="text-sm text-[#A3A199]">{localUp} röster</div>
+            <div className="text-sm font-medium text-cream">Ja, stämmer!</div>
+            <div className="text-sm text-muted">{localUp} röster</div>
           </div>
         </button>
 
         <button
           onClick={() => vote('down')}
           disabled={voted || alreadyVoted || loading}
-          className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-[#2c2c2a] border border-[#3a3a38] hover:border-[#f87171] transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-surface border border-line hover:border-danger transition-colors disabled:opacity-50"
         >
-          <ThumbsDown aria-hidden="true" className="w-5 h-5 text-[#f87171]" />
+          <ThumbsDown aria-hidden="true" className="w-5 h-5 text-danger" />
           <div className="text-left">
-            <div className="text-sm font-medium text-[#F1EFE8]">Nej, fel pris</div>
-            <div className="text-sm text-[#A3A199]">{localDown} röster</div>
+            <div className="text-sm font-medium text-cream">Nej, fel pris</div>
+            <div className="text-sm text-muted">{localDown} röster</div>
           </div>
         </button>
       </div>
 
       {voted && (
-        <p className="text-sm text-[#4ade80]">Tack för din röst! Det hjälper andra.</p>
+        <p className="text-sm text-success">Tack för din röst! Det hjälper andra.</p>
       )}
       {failed && (
-        <p className="text-sm text-[#f87171]">Rösten kunde inte sparas. Försök igen.</p>
+        <p className="text-sm text-danger">Rösten kunde inte sparas. Försök igen.</p>
       )}
       {votedDown && (
         <div className="pt-1">
@@ -113,7 +113,7 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
         </div>
       )}
       {alreadyVoted && (
-        <p className="text-sm text-[#A3A199]">Du har redan röstat på priset här i dag.</p>
+        <p className="text-sm text-muted">Du har redan röstat på priset här i dag.</p>
       )}
     </div>
   )

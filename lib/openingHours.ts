@@ -105,3 +105,32 @@ export function formatOpenStatus(status: OpenStatus): string | null {
   }
   return 'Stängt'
 }
+
+const WEEK_ORDER: DayName[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+
+const DAY_LABELS_SV: Record<DayName, string> = {
+  monday: 'Måndag', tuesday: 'Tisdag', wednesday: 'Onsdag', thursday: 'Torsdag',
+  friday: 'Fredag', saturday: 'Lördag', sunday: 'Söndag',
+}
+
+/**
+ * Veckoschema måndag → söndag med dagens rad markerad (B4).
+ * Saknade dagar visas som stängda, samma tolkning som getOpenStatus.
+ */
+export function getWeekSchedule(
+  hours: Record<string, string> | null,
+  now: Date = new Date(),
+): { day: DayName; label: string; hours: string; closed: boolean; isToday: boolean }[] {
+  const today = DAYNAMES[getStockholmClock(now).day]
+  return WEEK_ORDER.map(day => {
+    const value = hours?.[day]?.trim() ?? ''
+    const closed = parseDayHours(value).length === 0
+    return {
+      day,
+      label: DAY_LABELS_SV[day],
+      hours: closed ? 'Stängt' : value,
+      closed,
+      isToday: day === today,
+    }
+  })
+}

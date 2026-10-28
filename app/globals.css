@@ -6,42 +6,45 @@
 /* Synlig fokusring på allt interaktivt vid tangentbordsnavigering (A5) */
 @layer base {
   :focus-visible {
-    outline: 2px solid #F5C55B;
+    outline: 2px solid var(--color-teal);
     outline-offset: 2px;
   }
 }
 
-/* CSS-variabler för Sunkis färgpalett */
-:root {
-  --color-bg:        #1a1a18;
-  --color-surface:   #2c2c2a;
-  --color-amber:     #EF9F27;
-  --color-accent:    #BA7517;
-  --color-muted:     #A3A199;
-  --color-light:     #F1EFE8;
-  --color-green:     #4ade80;
-  --color-red:       #f87171;
-  --color-yellow:    #facc15;
-}
+/* Färgvariablerna (--color-*) genereras från lib/theme.ts i tailwind.config.ts */
 
 /* Bakgrund och textfärg för hela sidan */
 body {
-  background-color: var(--color-bg);
-  color: var(--color-light);
-  font-family: 'Inter', sans-serif;
+  background-color: var(--color-ink);
+  color: var(--color-cream);
 }
 
-/* Kartnålar — knapp med 44 × 44 px träffyta, nålen i botten */
-.sunkis-pin {
+/* Prisnålar (K2) — knapp med minst 44 × 44 px träffyta runt en prisetikett */
+.sunkis-price-pin {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  width: 44px;
+  min-width: 44px;
   height: 44px;
   padding: 0;
   background: none;
   border: 0;
   cursor: pointer;
+}
+.sunkis-price-pin__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  border: 2px solid var(--color-ink);
+  color: var(--color-ink);
+  font-family: var(--font-mono), monospace;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 /* Användarens position (K3) */
@@ -49,9 +52,9 @@ body {
   width: 18px;
   height: 18px;
   border-radius: 9999px;
-  background: #3b82f6;
-  border: 3px solid #ffffff;
-  box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.25);
+  background: var(--color-location);
+  border: 3px solid var(--color-white);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-location) 25%, transparent);
 }
 
 /* Zoomknapparna får träffytor på 44 × 44 px */
@@ -63,8 +66,8 @@ body {
 /* Mörkt tema för MapLibre-popups */
 .maplibregl-popup-content {
   background: var(--color-surface);
-  color: var(--color-light);
-  border: 1px solid #3a3a38;
+  color: var(--color-cream);
+  border: 1px solid var(--color-line);
   border-radius: 8px;
   padding: 12px 16px;
 }
@@ -84,20 +87,11 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-bg);
+  background: var(--color-ink);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--color-surface);
   border-radius: 3px;
-}
-
-/* Animering för happy hour-badge */
-@keyframes pulse-amber {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-.animate-pulse-amber {
-  animation: pulse-amber 2s ease-in-out infinite;
 }
 
 @layer utilities {
