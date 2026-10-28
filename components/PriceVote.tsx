@@ -6,6 +6,7 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getDeviceId } from '@/lib/deviceId'
+import { isAlreadyVoted } from '@/lib/votes'
 
 type Props = {
   barId: string
@@ -21,6 +22,7 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
   const [localDown, setLocalDown] = useState(thumbsDown)
 
   const [failed, setFailed] = useState(false)
+  const [alreadyVoted, setAlreadyVoted] = useState(false)
 
   // Skicka röst via vote_price — sparar rösten och räknar upp atomärt i databasen
   async function vote(type: 'up' | 'down') {
@@ -34,7 +36,10 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
       device_id: getDeviceId(),
     })
 
-    if (error) {
+    if (isAlreadyVoted(error)) {
+      // En röst per enhet och bar per 24 h (C3)
+      setAlreadyVoted(true)
+    } else if (error) {
       console.error('Röstning misslyckades:', error)
       setFailed(true)
     } else {
@@ -67,7 +72,7 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
       <div className="flex gap-4">
         <button
           onClick={() => vote('up')}
-          disabled={voted || loading}
+          disabled={voted || alreadyVoted || loading}
           className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-[#2c2c2a] border border-[#3a3a38] hover:border-[#4ade80] transition-colors disabled:opacity-50"
         >
           <span className="text-xl">👍</span>
@@ -79,7 +84,7 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
 
         <button
           onClick={() => vote('down')}
-          disabled={voted || loading}
+          disabled={voted || alreadyVoted || loading}
           className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-[#2c2c2a] border border-[#3a3a38] hover:border-[#f87171] transition-colors disabled:opacity-50"
         >
           <span className="text-xl">👎</span>
@@ -95,6 +100,9 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
       )}
       {failed && (
         <p className="text-sm text-[#f87171]">Rösten kunde inte sparas. Försök igen.</p>
+      )}
+      {alreadyVoted && (
+        <p className="text-sm text-[#A3A199]">Du har redan röstat på priset här i dag.</p>
       )}
     </div>
   )

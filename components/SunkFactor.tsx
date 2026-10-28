@@ -6,6 +6,7 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getDeviceId } from '@/lib/deviceId'
+import { isAlreadyVoted } from '@/lib/votes'
 
 type Props = {
   score: number        // nuvarande snittpoäng (0–5)
@@ -20,6 +21,7 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
   const [voted, setVoted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [failed, setFailed] = useState(false)
+  const [alreadyVoted, setAlreadyVoted] = useState(false)
   // Lokalt snitt och antal så UI uppdateras direkt efter röstning
   const [localScore, setLocalScore] = useState(score)
   const [localVotes, setLocalVotes] = useState(votes)
@@ -43,7 +45,10 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
       device_id: getDeviceId(),
     })
 
-    if (error) {
+    if (isAlreadyVoted(error)) {
+      // En röst per enhet och bar per 24 h (C3)
+      setAlreadyVoted(true)
+    } else if (error) {
       console.error('Röstning misslyckades:', error)
       setFailed(true)
     } else {
@@ -55,7 +60,7 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
     setLoading(false)
   }
 
-  const isInteractive = !!barId && !voted
+  const isInteractive = !!barId && !voted && !alreadyVoted
 
   // Ritar 5 cirklar — fylld, halvfylld eller tom beroende på poäng
   return (
@@ -123,6 +128,9 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
       )}
       {failed && (
         <span className="text-xs text-[#f87171]">Rösten kunde inte sparas. Försök igen.</span>
+      )}
+      {alreadyVoted && (
+        <span className="text-xs text-[#A3A199]">Du har redan röstat här i dag.</span>
       )}
     </div>
   )
