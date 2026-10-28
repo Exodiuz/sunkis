@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getDeviceId } from '@/lib/deviceId'
 import { isAlreadyVoted } from '@/lib/votes'
+import SuggestPrice from './SuggestPrice'
 
 type Props = {
   barId: string
@@ -23,6 +24,8 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
 
   const [failed, setFailed] = useState(false)
   const [alreadyVoted, setAlreadyVoted] = useState(false)
+  // Efter tumme ner frågar vi vad ölen kostar nu (C2)
+  const [votedDown, setVotedDown] = useState(false)
 
   // Skicka röst via vote_price — sparar rösten och räknar upp atomärt i databasen
   async function vote(type: 'up' | 'down') {
@@ -47,6 +50,7 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
       setLocalUp(counts.price_thumbs_up)
       setLocalDown(counts.price_thumbs_down)
       setVoted(true)
+      setVotedDown(type === 'down')
     }
     setLoading(false)
   }
@@ -100,6 +104,11 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
       )}
       {failed && (
         <p className="text-sm text-[#f87171]">Rösten kunde inte sparas. Försök igen.</p>
+      )}
+      {votedDown && (
+        <div className="pt-1">
+          <SuggestPrice barId={barId} label="Vad kostar den nu?" />
+        </div>
       )}
       {alreadyVoted && (
         <p className="text-sm text-[#A3A199]">Du har redan röstat på priset här i dag.</p>

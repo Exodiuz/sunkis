@@ -71,7 +71,6 @@ export default function SuggestPrice({ barId, label = 'Vad kostar en stor stark?
           onChange={e => setSize(e.target.value)}
           className="min-h-[44px] px-3 bg-[#1a1a18] border border-[#3a3a38] rounded-lg text-[#F1EFE8] text-sm focus:border-[#BA7517]"
         >
-          <option value="33cl">33 cl</option>
           <option value="40cl">40 cl</option>
           <option value="50cl">50 cl</option>
         </select>
