@@ -121,7 +121,7 @@ export default function AddressSearch({ value, onChange, onSelect, selected }: P
 
       <p className="mt-1 text-sm text-[#A3A199]" role="status">
         {selected
-          ? '✓ Plats vald – baren hamnar rätt på kartan.'
+          ? 'Plats vald – baren hamnar rätt på kartan.'
           : status === 'loading'
             ? 'Söker…'
             : status === 'error'

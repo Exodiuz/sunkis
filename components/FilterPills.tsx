@@ -3,6 +3,7 @@
 
 'use client'
 
+import { Clock, LocateFixed, Zap } from 'lucide-react'
 import { AREAS, MAX_PRICE_OPTIONS, MIN_SUNK_OPTIONS, type BarFilters } from '@/lib/filters'
 import { SUNK_LEVELS } from '@/lib/sunk'
 
@@ -42,13 +43,15 @@ export default function FilterPills({ filters, onChange, nearMe = false, onToggl
         onClick={() => onChange({ openNow: !filters.openNow })}
         className={pillClass(filters.openNow)}
       >
-        🟢 Öppet nu
+        <Clock aria-hidden="true" className="w-4 h-4 mr-1.5" />
+        Öppet nu
       </button>
 
       {/* Nära mig — frågar om position vid första tryck */}
       {onToggleNearMe && (
         <button type="button" aria-pressed={nearMe} onClick={onToggleNearMe} className={pillClass(nearMe)}>
-          📍 Nära mig
+          <LocateFixed aria-hidden="true" className="w-4 h-4 mr-1.5" />
+          Nära mig
         </button>
       )}
 
@@ -58,7 +61,8 @@ export default function FilterPills({ filters, onChange, nearMe = false, onToggl
         onClick={() => onChange({ happyHour: !filters.happyHour })}
         className={pillClass(filters.happyHour)}
       >
-        ⚡ Happy hour nu
+        <Zap aria-hidden="true" className="w-4 h-4 mr-1.5" />
+        Happy hour nu
       </button>
 
       <select

@@ -3,6 +3,7 @@
 
 'use client'
 
+import { TriangleAlert } from 'lucide-react'
 import Link from 'next/link'
 import type { Bar } from '@/lib/supabase'
 import { getCurrentPrice, isHappyHourActive, formatHappyHourTime, formatSize } from '@/lib/happyHour'
@@ -85,7 +86,8 @@ export default function BarCard({ bar, rank, now, distance = null }: Props) {
                   {/* Varning om priset är osäkert */}
                   {priceUncertain && (
                     <div className="text-sm text-[#facc15]" title="Många har rapporterat felaktigt pris">
-                      ⚠️ Osäkert
+                      <TriangleAlert aria-hidden="true" className="inline w-4 h-4 -mt-0.5 mr-1" />
+                      Osäkert
                     </div>
                   )}
                 </>

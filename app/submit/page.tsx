@@ -3,6 +3,7 @@
 
 'use client'
 
+import { ArrowLeft, Beer } from 'lucide-react'
 import { useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
@@ -103,7 +104,7 @@ export default function SubmitPage() {
     return (
       <div className="min-h-screen bg-[#1a1a18] flex items-center justify-center px-4">
         <div className="text-center max-w-sm space-y-4">
-          <div className="text-5xl">🍺</div>
+          <Beer aria-hidden="true" className="w-12 h-12 mx-auto text-[#EF9F27]" />
           <h1 className="text-2xl font-medium text-[#F1EFE8]">Tack!</h1>
           <p className="text-[#A3A199]">
             Baren har skickats in och granskas av admin. Den syns i listan och på kartan så fort priset är verifierat.
@@ -125,7 +126,8 @@ export default function SubmitPage() {
       <header className="bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
         <div className="max-w-2xl mx-auto px-4 py-1 flex items-center gap-3">
           <Link href="/" className="inline-flex items-center min-h-[44px] text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-            ← Tillbaka
+            <ArrowLeft aria-hidden="true" className="w-4 h-4 mr-1" />
+            Tillbaka
           </Link>
           <span className="text-[#3a3a38]">/</span>
           <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-medium">

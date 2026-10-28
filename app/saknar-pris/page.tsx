@@ -1,6 +1,7 @@
 // Barer som saknar pris — besökare kan föreslå vad ölen kostar
 // Sorteras efter Google-betyg så att de mest besökta barerna kommer först
 
+import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import SuggestPrice from '@/components/SuggestPrice'
@@ -36,7 +37,8 @@ export default async function MissingPricesPage() {
       <header className="bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
         <div className="max-w-2xl mx-auto px-4 py-1 flex items-center gap-3">
           <Link href="/" className="inline-flex items-center min-h-[44px] text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-            ← Tillbaka
+            <ArrowLeft aria-hidden="true" className="w-4 h-4 mr-1" />
+            Tillbaka
           </Link>
           <span className="text-[#3a3a38]">/</span>
           <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-medium">

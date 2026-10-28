@@ -1,6 +1,7 @@
 // Bar-detaljsida — visar all information om en specifik bar
 // Server-side rendering med dynamisk route /bar/[id]
 
+import { ArrowLeft, Check, Globe, MapPin, Phone } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -71,7 +72,8 @@ export default async function BarPage({ params }: Props) {
       <header className="bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
         <div className="max-w-2xl mx-auto px-4 py-1 flex items-center gap-3">
           <Link href="/" className="inline-flex items-center min-h-[44px] text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-            ← Tillbaka
+            <ArrowLeft aria-hidden="true" className="w-4 h-4 mr-1" />
+            Tillbaka
           </Link>
           <span className="text-[#3a3a38]">/</span>
           <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-medium">
@@ -161,7 +163,7 @@ export default async function BarPage({ params }: Props) {
           {/* Verifiering och färskhet (D3) */}
           <div className="flex items-center gap-2 flex-wrap pt-1">
             {bar.price_verified ? (
-              <span className="text-sm text-[#4ade80]">✓ Prisverifierat</span>
+              <span className="inline-flex items-center gap-1 text-sm text-[#4ade80]"><Check aria-hidden="true" className="w-4 h-4" /> Prisverifierat</span>
             ) : (
               <span className="text-sm text-[#A3A199]">Ej verifierat</span>
             )}
@@ -222,7 +224,8 @@ export default async function BarPage({ params }: Props) {
               rel="noopener noreferrer"
               className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#A3A199] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
             >
-              📍 Öppna i Google Maps
+              <MapPin aria-hidden="true" className="w-4 h-4" />
+              Öppna i Google Maps
             </a>
           )}
 
@@ -234,7 +237,8 @@ export default async function BarPage({ params }: Props) {
               rel="noopener noreferrer"
               className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#A3A199] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
             >
-              🌐 Webbplats
+              <Globe aria-hidden="true" className="w-4 h-4" />
+              Webbplats
             </a>
           )}
 
@@ -244,7 +248,8 @@ export default async function BarPage({ params }: Props) {
               href={`tel:${bar.phone}`}
               className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#A3A199] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
             >
-              📞 {bar.phone}
+              <Phone aria-hidden="true" className="w-4 h-4" />
+              {bar.phone}
             </a>
           )}
         </div>
@@ -254,7 +259,8 @@ export default async function BarPage({ params }: Props) {
           href="/"
           className="inline-flex items-center min-h-[44px] text-sm text-[#A3A199] hover:text-[#EF9F27] transition-colors"
         >
-          ← Tillbaka till listan
+          <ArrowLeft aria-hidden="true" className="w-4 h-4 mr-1" />
+          Tillbaka till listan
         </Link>
       </main>
     </div>

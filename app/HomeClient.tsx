@@ -3,6 +3,7 @@
 
 'use client'
 
+import { Map as MapIcon, Plus, Search, X, Beer, ArrowRight } from 'lucide-react'
 import { useState, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import type { Bar } from '@/lib/supabase'
@@ -100,10 +101,12 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
             {/* Navigation */}
             <nav className="flex items-center gap-1 text-sm -mr-2">
               <Link href={`/map${filtersToQueryString(filters)}`} className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-                🗺️ Karta
+                <MapIcon aria-hidden="true" className="w-4 h-4" />
+                <span className="ml-1">Karta</span>
               </Link>
               <Link href="/submit" className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-                + Lägg till
+                <Plus aria-hidden="true" className="w-4 h-4" />
+                <span className="ml-1">Lägg till</span>
               </Link>
             </nav>
           </div>
@@ -115,7 +118,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
       <div className="max-w-2xl mx-auto px-4 pt-4 pb-2 space-y-3">
         {/* Sökruta */}
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A3A199]">🔍</span>
+          <Search aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A3A199]" />
           <input
             type="text"
             ref={searchRef}
@@ -186,7 +189,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
               onClick={() => { resetFilters(); setNearMe(false); searchRef.current?.focus() }}
               className="min-h-[44px] px-2 -mr-2 text-sm text-[#EF9F27] hover:text-[#F5C55B]"
             >
-              Rensa filter ×
+              Rensa filter <X aria-hidden="true" className="inline w-4 h-4 -mt-0.5" />
             </button>
           )}
         </div>
@@ -194,7 +197,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
         {/* Inga resultat */}
         {filteredBars.length === 0 && (
           <div className="text-center py-16 text-[#A3A199]">
-            <div className="text-4xl mb-3">🍺</div>
+            <Beer aria-hidden="true" className="w-10 h-10 mx-auto mb-3" />
             <p className="text-lg font-medium text-[#F1EFE8]">Inga barer hittades</p>
             <p className="text-sm mt-1">Prova ett annat filter eller sök på nytt</p>
           </div>
@@ -222,7 +225,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
             <span>
               {missingPriceCount} {missingPriceCount === 1 ? 'bar saknar' : 'barer saknar'} pris – vet du vad det kostar?
             </span>
-            <span aria-hidden="true" className="text-[#EF9F27]">→</span>
+            <ArrowRight aria-hidden="true" className="w-4 h-4 flex-shrink-0 text-[#EF9F27]" />
           </Link>
         )}
 
@@ -231,7 +234,7 @@ export default function HomeClient({ bars, missingPriceCount, renderedAt }: Prop
           <p className="text-sm text-[#A3A199]">
             Känner du till ett billigt hak?{' '}
             <Link href="/submit" className="text-[#EF9F27] underline underline-offset-2">
-              Lägg till det →
+              Lägg till det <ArrowRight aria-hidden="true" className="inline w-4 h-4 -mt-0.5" />
             </Link>
           </p>
         </div>

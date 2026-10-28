@@ -3,6 +3,7 @@
 
 'use client'
 
+import { ThumbsDown, ThumbsUp, TriangleAlert } from 'lucide-react'
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getDeviceId } from '@/lib/deviceId'
@@ -68,7 +69,8 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
             className="text-sm text-[#facc15]"
             title={`${localDown} säger att priset inte stämmer`}
           >
-            ⚠️ Osäkert pris
+            <TriangleAlert aria-hidden="true" className="inline w-4 h-4 -mt-0.5 mr-1" />
+            Osäkert pris
           </span>
         )}
       </div>
@@ -79,7 +81,7 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
           disabled={voted || alreadyVoted || loading}
           className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-[#2c2c2a] border border-[#3a3a38] hover:border-[#4ade80] transition-colors disabled:opacity-50"
         >
-          <span className="text-xl">👍</span>
+          <ThumbsUp aria-hidden="true" className="w-5 h-5 text-[#4ade80]" />
           <div className="text-left">
             <div className="text-sm font-medium text-[#F1EFE8]">Ja, stämmer!</div>
             <div className="text-sm text-[#A3A199]">{localUp} röster</div>
@@ -91,7 +93,7 @@ export default function PriceVote({ barId, thumbsUp, thumbsDown }: Props) {
           disabled={voted || alreadyVoted || loading}
           className="flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-[#2c2c2a] border border-[#3a3a38] hover:border-[#f87171] transition-colors disabled:opacity-50"
         >
-          <span className="text-xl">👎</span>
+          <ThumbsDown aria-hidden="true" className="w-5 h-5 text-[#f87171]" />
           <div className="text-left">
             <div className="text-sm font-medium text-[#F1EFE8]">Nej, fel pris</div>
             <div className="text-sm text-[#A3A199]">{localDown} röster</div>

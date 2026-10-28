@@ -3,6 +3,7 @@
 
 'use client'
 
+import { List, Plus, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -84,10 +85,12 @@ export default function MapClient({ bars, renderedAt }: Props) {
           <div className="flex items-center gap-1 text-sm -mr-2">
             {/* Tillbaka till listan med samma filter */}
             <Link href={`/${filtersToQueryString(filters)}`} className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-              ☰ Lista
+              <List aria-hidden="true" className="w-4 h-4 mr-1" />
+              Lista
             </Link>
             <Link href="/submit" className="inline-flex items-center min-h-[44px] px-2 text-[#A3A199] hover:text-[#EF9F27] transition-colors">
-              + Lägg till
+              <Plus aria-hidden="true" className="w-4 h-4 mr-1" />
+              Lägg till
             </Link>
           </div>
         </div>
@@ -103,7 +106,7 @@ export default function MapClient({ bars, renderedAt }: Props) {
               onClick={resetFilters}
               className="flex-shrink-0 min-h-[44px] px-2 -mr-2 text-[#EF9F27] hover:text-[#F5C55B]"
             >
-              Rensa filter ×
+              Rensa filter <X aria-hidden="true" className="inline w-4 h-4 -mt-0.5" />
             </button>
           </div>
         )}
