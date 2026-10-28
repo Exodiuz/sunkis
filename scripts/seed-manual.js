@@ -276,7 +276,7 @@ const BARS = [
   {
     name: 'Monks American Ale House',
     address: 'Munkbrogatan 11, City',
-    area: 'City',
+    area: 'Norrmalm',
     lat: 59.3249,
     lng: 18.0679,
     price_40cl: 59,

@@ -19,7 +19,16 @@ const WEEKDAYS = [
   { value: 'sunday', label: 'Sön' },
 ]
 
-type View = 'login' | 'no-price' | 'votes' | 'all'
+type View = 'login' | 'no-price' | 'votes' | 'suggestions' | 'all'
+
+// Väntande prisförslag från besökare (C2)
+type Suggestion = {
+  id: string
+  price: number
+  size: string
+  created_at: string
+  bar: { id: string; name: string; area: string | null; price_40cl: number | null; price_50cl: number | null } | null
+}
 
 export default function AdminPage() {
   const [view, setView] = useState<View>('login')
@@ -29,6 +38,7 @@ export default function AdminPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [editingBar, setEditingBar] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
 
   // Formulärstate för redigering
   const [editForm, setEditForm] = useState({
@@ -63,9 +73,46 @@ export default function AdminPage() {
     if (data) setBars(data)
   }, [])
 
+  // Hämtar väntande prisförslag via admin-API:t (service role)
+  const loadSuggestions = useCallback(async () => {
+    const res = await fetch('/api/admin/suggestions')
+    if (res.ok) setSuggestions((await res.json()).suggestions)
+  }, [])
+
   useEffect(() => {
-    if (view !== 'login') loadBars()
-  }, [view, loadBars])
+    if (view !== 'login') {
+      loadBars()
+      loadSuggestions()
+    }
+  }, [view, loadBars, loadSuggestions])
+
+  // Godkänner eller avvisar ett prisförslag
+  async function reviewSuggestion(id: string, approve: boolean) {
+    const res = await fetch(`/api/admin/suggestions/${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ approve }),
+    })
+    if (!res.ok) {
+      const { error } = await res.json().catch(() => ({ error: '' }))
+      alert(`Kunde inte granska förslaget. ${error ?? ''}`)
+    }
+    loadSuggestions()
+    loadBars()
+  }
+
+  // Skriver till bars via server-routen (anon-nyckeln får inte uppdatera, se D5)
+  async function adminUpdate(barId: string, update: Record<string, unknown>) {
+    const res = await fetch(`/api/admin/bars/${barId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(update),
+    })
+    if (!res.ok) {
+      alert('Kunde inte spara — logga in igen.')
+      throw new Error(`Admin-uppdatering misslyckades: ${res.status}`)
+    }
+  }
 
   // Öppnar redigeringsformuläret för en bar
   function startEdit(bar: Bar) {
@@ -85,20 +132,17 @@ export default function AdminPage() {
   async function saveBar(barId: string) {
     setSaving(true)
     try {
-      await supabase
-        .from('bars')
-        .update({
-          price_40cl: editForm.price_40cl ? parseInt(editForm.price_40cl) : null,
-          price_50cl: editForm.price_50cl ? parseInt(editForm.price_50cl) : null,
-          happy_hour_price: editForm.happy_hour_price ? parseInt(editForm.happy_hour_price) : null,
-          happy_hour_start: editForm.happy_hour_start || null,
-          happy_hour_end: editForm.happy_hour_end || null,
-          happy_hour_days: editForm.happy_hour_days.length > 0 ? editForm.happy_hour_days : null,
-          sunk_factor: parseFloat(editForm.sunk_factor),
-          price_verified: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', barId)
+      await adminUpdate(barId, {
+        price_40cl: editForm.price_40cl ? parseInt(editForm.price_40cl) : null,
+        price_50cl: editForm.price_50cl ? parseInt(editForm.price_50cl) : null,
+        happy_hour_price: editForm.happy_hour_price ? parseInt(editForm.happy_hour_price) : null,
+        happy_hour_start: editForm.happy_hour_start || null,
+        happy_hour_end: editForm.happy_hour_end || null,
+        happy_hour_days: editForm.happy_hour_days.length > 0 ? editForm.happy_hour_days : null,
+        sunk_factor: parseFloat(editForm.sunk_factor),
+        price_verified: true,
+        updated_at: new Date().toISOString(),
+      })
       setEditingBar(null)
       loadBars()
     } catch (e) {
@@ -110,17 +154,15 @@ export default function AdminPage() {
 
   // Nollställer prisröstningar
   async function resetVotes(barId: string) {
-    await supabase
-      .from('bars')
-      .update({ price_thumbs_up: 0, price_thumbs_down: 0, price_verified: true })
-      .eq('id', barId)
+    await adminUpdate(barId, { price_thumbs_up: 0, price_thumbs_down: 0, price_verified: true })
     loadBars()
   }
 
   // Tar bort en bar
   async function deleteBar(barId: string, name: string) {
     if (!confirm(`Ta bort "${name}"? Det går inte att ångra.`)) return
-    await supabase.from('bars').delete().eq('id', barId)
+    const res = await fetch(`/api/admin/bars/${barId}`, { method: 'DELETE' })
+    if (!res.ok) alert('Kunde inte ta bort baren — logga in igen.')
     loadBars()
   }
 
@@ -269,6 +311,7 @@ export default function AdminPage() {
           {[
             { key: 'no-price', label: `Utan pris (${noPriceBars.length})` },
             { key: 'votes', label: 'Prisröstningar' },
+            { key: 'suggestions', label: `Prisförslag (${suggestions.length})` },
             { key: 'all', label: 'Alla barer' },
           ].map(({ key, label }) => (
             <button
@@ -376,6 +419,53 @@ export default function AdminPage() {
                 {editingBar === bar.id && <EditForm bar={bar} />}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* VY — Prisförslag från besökare (C2) */}
+        {view === 'suggestions' && (
+          <div className="space-y-3">
+            <p className="text-sm text-[#888780]">
+              Förslag från besökare. Godkänt pris skrivs till baren, verifieras och nollställer prisröstningarna.
+            </p>
+            {suggestions.length === 0 ? (
+              <div className="text-center py-8 text-[#888780]">Inga väntande förslag.</div>
+            ) : (
+              suggestions.map(sug => (
+                <div key={sug.id} className="bg-[#2c2c2a] rounded-xl p-4 border border-[#3a3a38]">
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                      {sug.bar ? (
+                        <Link href={`/bar/${sug.bar.id}`} className="font-medium text-[#F1EFE8] hover:text-[#EF9F27]">
+                          {sug.bar.name}
+                        </Link>
+                      ) : (
+                        <span className="font-medium text-[#F1EFE8]">Okänd bar</span>
+                      )}
+                      <div className="text-sm text-[#888780] mt-0.5">
+                        Förslag: <span className="text-[#EF9F27]">{sug.price} kr / {sug.size}</span>
+                        {' · nu: '}
+                        {sug.bar?.price_40cl ? `${sug.bar.price_40cl} kr/40cl` : ''}
+                        {sug.bar?.price_40cl && sug.bar?.price_50cl ? ', ' : ''}
+                        {sug.bar?.price_50cl ? `${sug.bar.price_50cl} kr/50cl` : ''}
+                        {!sug.bar?.price_40cl && !sug.bar?.price_50cl ? 'inget pris' : ''}
+                        {' · '}{new Date(sug.created_at).toLocaleDateString('sv-SE')}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => reviewSuggestion(sug.id, true)}
+                        className="px-3 py-1 bg-[#BA7517] hover:bg-[#EF9F27] text-white rounded text-xs transition-colors">
+                        Godkänn
+                      </button>
+                      <button onClick={() => reviewSuggestion(sug.id, false)}
+                        className="px-3 py-1 bg-[#2c2c2a] border border-[#3a3a38] text-[#888780] rounded text-xs hover:text-[#F1EFE8] transition-colors">
+                        Avvisa
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
 

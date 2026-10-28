@@ -1,6 +1,7 @@
 // Bar-detaljsida — visar all information om en specifik bar
 // Server-side rendering med dynamisk route /bar/[id]
 
+import { ArrowLeft, Check, Globe, Phone } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -9,10 +10,16 @@ import {
   isHappyHourActive,
   formatHappyHourTime,
   formatHappyHourDays,
+  formatSize,
 } from '@/lib/happyHour'
 import SunkFactor from '@/components/SunkFactor'
 import PriceVote from '@/components/PriceVote'
 import HappyHourBadge from '@/components/HappyHourBadge'
+import OpenStatus from '@/components/OpenStatus'
+import OpeningHours from '@/components/OpeningHours'
+import DirectionsButton from '@/components/DirectionsButton'
+import PriceFreshness from '@/components/PriceFreshness'
+import { SUNK_LEVELS } from '@/lib/sunk'
 
 type Props = {
   params: { id: string }
@@ -40,17 +47,6 @@ export async function generateMetadata({ params }: Props) {
   }
 }
 
-// Dagnamn på svenska för öppettider
-const DAY_LABELS: Record<string, string> = {
-  monday: 'Måndag',
-  tuesday: 'Tisdag',
-  wednesday: 'Onsdag',
-  thursday: 'Torsdag',
-  friday: 'Fredag',
-  saturday: 'Lördag',
-  sunday: 'Söndag',
-}
-
 export const revalidate = 300
 
 export default async function BarPage({ params }: Props) {
@@ -62,22 +58,23 @@ export default async function BarPage({ params }: Props) {
   const openingHours = bar.opening_hours as Record<string, string> | null
 
   return (
-    <div className="min-h-screen bg-[#1a1a18]">
+    <div className="min-h-screen bg-ink">
       {/* Header */}
-      <header className="bg-[#1a1a18]/95 backdrop-blur-sm border-b border-[#2c2c2a]">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/" className="text-[#888780] hover:text-[#EF9F27] transition-colors">
-            ← Tillbaka
+      <header className="bg-ink/95 backdrop-blur-sm border-b border-surface">
+        <div className="max-w-2xl mx-auto px-4 py-1 flex items-center gap-3">
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-muted hover:text-brand-light transition-colors">
+            <ArrowLeft aria-hidden="true" className="w-4 h-4 mr-1" />
+            Tillbaka
           </Link>
-          <span className="text-[#3a3a38]">/</span>
-          <Link href="/" className="text-xl font-medium">
-            <span className="text-[#EF9F27]">sunk</span>
-            <span className="text-[#F5C55B]">is</span>
+          <span className="text-line">/</span>
+          <Link href="/" className="inline-flex items-center min-h-[44px] text-xl font-display font-bold">
+            <span className="text-brand">sunk</span>
+            <span className="text-teal">is</span>
           </Link>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-2xl mx-auto px-4 pt-6 pb-24 space-y-6">
         {/* Foto om det finns */}
         {bar.photo_url && (
           <div className="relative w-full h-52 rounded-xl overflow-hidden">
@@ -89,7 +86,7 @@ export default async function BarPage({ params }: Props) {
               sizes="(max-width: 672px) 100vw, 672px"
             />
             {/* Gradient för bättre läsbarhet av text ovanpå bild */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a18]/80 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/80 to-transparent" />
           </div>
         )}
 
@@ -97,15 +94,16 @@ export default async function BarPage({ params }: Props) {
         <div className="space-y-2">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-medium text-[#F1EFE8]">{bar.name}</h1>
-              {bar.area && <p className="text-[#888780]">{bar.area}</p>}
-              {bar.address && <p className="text-sm text-[#888780] mt-0.5">{bar.address}</p>}
+              <h1 className="font-display text-2xl font-medium text-cream">{bar.name}</h1>
+              {bar.area && <p className="text-muted">{bar.area}</p>}
+              {bar.address && <p className="text-sm text-muted mt-0.5">{bar.address}</p>}
+              <OpenStatus bar={bar} renderedAt={Date.now()} className="text-sm mt-1 inline-block" />
             </div>
             {/* Google-betyg om det finns */}
             {bar.google_rating && (
-              <div className="flex-shrink-0 text-center bg-[#2c2c2a] rounded-lg px-3 py-2">
-                <div className="text-[#EF9F27] font-medium">{bar.google_rating.toFixed(1)}</div>
-                <div className="text-xs text-[#888780]">Google</div>
+              <div className="flex-shrink-0 text-center bg-surface rounded-lg px-3 py-2">
+                <div className="text-brand-light font-medium">{bar.google_rating.toFixed(1)}</div>
+                <div className="text-sm text-muted">Google</div>
               </div>
             )}
           </div>
@@ -115,32 +113,32 @@ export default async function BarPage({ params }: Props) {
         </div>
 
         {/* Priser */}
-        <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-3">
-          <h2 className="text-sm font-medium text-[#888780] uppercase tracking-wide">Priser</h2>
+        <div className="bg-surface rounded-xl p-4 space-y-3">
+          <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Priser</h2>
 
           <div className="flex flex-wrap gap-4">
             {/* 40cl */}
             {bar.price_40cl && (
               <div>
-                <div className="text-3xl font-medium text-[#EF9F27]">{bar.price_40cl} kr</div>
-                <div className="text-xs text-[#888780]">40cl</div>
+                <div className="font-mono text-3xl font-bold text-brand-light">{bar.price_40cl} kr</div>
+                <div className="text-sm text-muted">40 cl</div>
               </div>
             )}
             {/* 50cl */}
             {bar.price_50cl && (
               <div>
-                <div className="text-3xl font-medium text-[#EF9F27]">{bar.price_50cl} kr</div>
-                <div className="text-xs text-[#888780]">50cl</div>
+                <div className="font-mono text-3xl font-bold text-brand-light">{bar.price_50cl} kr</div>
+                <div className="text-sm text-muted">50 cl</div>
               </div>
             )}
             {/* Happy hour */}
             {bar.happy_hour_price && (
               <div>
-                <div className={`text-3xl font-medium ${hhActive ? 'text-[#4ade80]' : 'text-[#F1EFE8]'}`}>
+                <div className={`font-mono text-3xl font-bold ${hhActive ? 'text-success' : 'text-cream'}`}>
                   {bar.happy_hour_price} kr
                 </div>
-                <div className="text-xs text-[#888780]">
-                  Happy hour {formatHappyHourTime(bar)}
+                <div className="text-sm text-muted">
+                  {formatSize(bar.happy_hour_size || '40cl')} · Happy hour {formatHappyHourTime(bar)}
                 </div>
               </div>
             )}
@@ -148,29 +146,41 @@ export default async function BarPage({ params }: Props) {
 
           {/* Happy hour-info */}
           {bar.happy_hour_price && (
-            <div className="text-sm text-[#888780] pt-1">
+            <div className="text-sm text-muted pt-1">
               Happy hour: {formatHappyHourTime(bar)} på {formatHappyHourDays(bar.happy_hour_days)}
             </div>
           )}
 
-          {/* Verifieringsindikator */}
-          <div className="flex items-center gap-2 pt-1">
+          {/* Verifiering och färskhet (D3) */}
+          <div className="flex items-center gap-2 flex-wrap pt-1">
             {bar.price_verified ? (
-              <span className="text-xs text-[#4ade80]">✓ Prisverifierat</span>
+              <span className="inline-flex items-center gap-1 text-sm text-success"><Check aria-hidden="true" className="w-4 h-4" /> Prisverifierat</span>
             ) : (
-              <span className="text-xs text-[#888780]">Ej verifierat</span>
+              <span className="text-sm text-muted">Ej verifierat</span>
             )}
+            <PriceFreshness bar={bar} className="text-sm" />
           </div>
         </div>
 
         {/* Sunkfaktor */}
-        <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-3">
-          <h2 className="text-sm font-medium text-[#888780] uppercase tracking-wide">Sunkfaktor</h2>
+        <div className="bg-surface rounded-xl p-4 space-y-3">
+          <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Sunkfaktor</h2>
           <SunkFactor score={bar.sunk_factor} votes={bar.sunk_votes} barId={bar.id} />
+          {/* Förklaring av skalan (B2) */}
+          <details className="text-sm text-muted">
+            <summary className="cursor-pointer min-h-[44px] flex items-center text-brand-light">Vad betyder sunkfaktor?</summary>
+            <ul className="space-y-1 pt-1">
+              {SUNK_LEVELS.map(level => (
+                <li key={level.score}>
+                  <span className="text-cream">{level.score} – {level.label}:</span> {level.description}
+                </li>
+              ))}
+            </ul>
+          </details>
         </div>
 
         {/* Stämmer priset? */}
-        <div className="bg-[#2c2c2a] rounded-xl p-4">
+        <div className="bg-surface rounded-xl p-4">
           <PriceVote
             barId={bar.id}
             thumbsUp={bar.price_thumbs_up}
@@ -180,44 +190,24 @@ export default async function BarPage({ params }: Props) {
 
         {/* Öppettider */}
         {openingHours && Object.keys(openingHours).length > 0 && (
-          <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-3">
-            <h2 className="text-sm font-medium text-[#888780] uppercase tracking-wide">Öppettider</h2>
-            <div className="space-y-1.5">
-              {Object.entries(openingHours).map(([day, hours]) => (
-                <div key={day} className="flex justify-between text-sm">
-                  <span className="text-[#888780]">{DAY_LABELS[day] ?? day}</span>
-                  <span className={hours === 'stängt' ? 'text-[#f87171]' : 'text-[#F1EFE8]'}>
-                    {hours}
-                  </span>
-                </div>
-              ))}
-            </div>
+          <div className="bg-surface rounded-xl p-4 space-y-3">
+            <h2 className="font-display text-sm font-medium text-muted uppercase tracking-wide">Öppettider</h2>
+            <OpeningHours hours={openingHours} renderedAt={Date.now()} />
           </div>
         )}
 
         {/* Kontakt och länkar */}
         <div className="flex flex-wrap gap-3">
-          {/* Google Maps-länk */}
-          {bar.lat && bar.lng && (
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${bar.lat},${bar.lng}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#888780] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
-            >
-              📍 Öppna i Google Maps
-            </a>
-          )}
-
           {/* Webbplats */}
           {bar.website && (
             <a
               href={bar.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#888780] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
+              className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-surface border border-line rounded-lg text-sm text-muted hover:text-brand-light hover:border-brand transition-colors"
             >
-              🌐 Webbplats
+              <Globe aria-hidden="true" className="w-4 h-4" />
+              Webbplats
             </a>
           )}
 
@@ -225,9 +215,10 @@ export default async function BarPage({ params }: Props) {
           {bar.phone && (
             <a
               href={`tel:${bar.phone}`}
-              className="flex items-center gap-2 px-4 py-2 bg-[#2c2c2a] border border-[#3a3a38] rounded-lg text-sm text-[#888780] hover:text-[#EF9F27] hover:border-[#BA7517] transition-colors"
+              className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-surface border border-line rounded-lg text-sm text-muted hover:text-brand-light hover:border-brand transition-colors"
             >
-              📞 {bar.phone}
+              <Phone aria-hidden="true" className="w-4 h-4" />
+              {bar.phone}
             </a>
           )}
         </div>
@@ -235,11 +226,15 @@ export default async function BarPage({ params }: Props) {
         {/* Tillbaka-knapp */}
         <Link
           href="/"
-          className="inline-block text-sm text-[#888780] hover:text-[#EF9F27] transition-colors"
+          className="inline-flex items-center min-h-[44px] text-sm text-muted hover:text-brand-light transition-colors"
         >
-          ← Tillbaka till listan
+          <ArrowLeft aria-hidden="true" className="w-4 h-4 mr-1" />
+          Tillbaka till listan
         </Link>
       </main>
+
+      {/* Vägbeskrivning i tumzonen (B3) */}
+      {bar.lat !== null && bar.lng !== null && <DirectionsButton lat={bar.lat} lng={bar.lng} />}
     </div>
   )
 }

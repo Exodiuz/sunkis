@@ -7,9 +7,12 @@ import { createClient } from '@supabase/supabase-js'
 export type Bar = {
   id: string
   google_place_id: string | null
+  osm_id: string | null            // "node/123" från adressökningen (C1)
   name: string
   address: string | null
   area: string | null
+  tags: string[] | null            // fri märkning, finns i databasen sedan 2026-06-06
+  blurb: string | null             // kort beskrivning, finns i databasen sedan 2026-06-06
   lat: number | null
   lng: number | null
   opening_hours: Record<string, string> | null
@@ -23,11 +26,13 @@ export type Bar = {
   happy_hour_start: string | null  // t.ex. "15:00"
   happy_hour_end: string | null    // t.ex. "18:00"
   happy_hour_days: string[] | null // t.ex. ["monday","tuesday"]
+  happy_hour_size: string | null   // "33cl" | "40cl" | "50cl"
   sunk_factor: number
   sunk_votes: number
   price_verified: boolean
   price_thumbs_up: number
   price_thumbs_down: number
+  price_confirmed_at: string | null // senaste bekräftelse av priset (D3)
   created_at: string
   updated_at: string
 }

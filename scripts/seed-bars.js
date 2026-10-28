@@ -146,7 +146,7 @@ function determineArea(lat, lng) {
   if (lat >= 59.33 && lat <= 59.35 && lng >= 18.07 && lng <= 18.12) {
     return 'Östermalm'
   }
-  return 'City'
+  return 'Norrmalm' // samma benämning som databasen (normalize_area)
 }
 
 // Konverterar Google Places öppettider till vårt JSONB-format

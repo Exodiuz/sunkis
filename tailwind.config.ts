@@ -1,7 +1,9 @@
 // Tailwind-konfiguration för Sunkis
-// Utökar med Sunkis-färger och Inter-font
+// Färger och typsnitt kommer från varumärket i lib/theme.ts (V1)
 
 import type { Config } from 'tailwindcss'
+import plugin from 'tailwindcss/plugin'
+import { colors, cssColorVariables } from './lib/theme'
 
 const config: Config = {
   // Tailwind scannar dessa filer för CSS-klasser
@@ -12,34 +14,32 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      // Sunkis-färgpalett som Tailwind-klasser
-      colors: {
-        sunkis: {
-          bg:      '#1a1a18',
-          surface: '#2c2c2a',
-          amber:   '#EF9F27',
-          accent:  '#BA7517',
-          muted:   '#888780',
-          light:   '#F1EFE8',
-        },
-      },
-      // Inter-font via CSS-variabel
+      // Varumärkets färger som Tailwind-klasser: bg-ink, text-brand-light, border-line …
+      colors,
+      // Typsnitt laddas med next/font i app/layout.tsx
       fontFamily: {
-        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
       // Animeringar för happy hour-badge
       animation: {
-        'pulse-amber': 'pulse-amber 2s ease-in-out infinite',
+        'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
       },
       keyframes: {
-        'pulse-amber': {
+        'pulse-soft': {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.7' },
         },
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Samma färger som CSS-variabler (--color-ink …) för globals.css
+    plugin(({ addBase }) => {
+      addBase({ ':root': cssColorVariables() })
+    }),
+  ],
 }
 
 export default config
