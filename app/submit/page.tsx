@@ -89,7 +89,7 @@ export default function SubmitPage() {
           <div className="text-5xl">🍺</div>
           <h1 className="text-2xl font-medium text-[#F1EFE8]">Tack!</h1>
           <p className="text-[#888780]">
-            Baren har skickats in och granskas av admin. Den dyker upp i listan när priset är verifierat.
+            Baren har skickats in och granskas av admin. Den syns i listan och på kartan så fort priset är verifierat.
           </p>
           <Link
             href="/"

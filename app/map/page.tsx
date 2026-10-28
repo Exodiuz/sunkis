@@ -15,11 +15,12 @@ const BarMap = dynamic(() => import('@/components/BarMap'), {
   ),
 })
 
-// Hämtar barer med koordinater
+// Hämtar granskade barer med koordinater — ogranskade inskick visas inte (D6)
 async function getBars() {
   const { data, error } = await supabase
     .from('bars')
     .select('*')
+    .eq('price_verified', true)
     .not('lat', 'is', null)
     .not('lng', 'is', null)
 

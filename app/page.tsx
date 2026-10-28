@@ -4,12 +4,13 @@
 import { supabase } from '@/lib/supabase'
 import HomeClient from './HomeClient'
 
-// Hämtar alla barer sorterade billigast → dyrast
-// Barer utan pris hamnar längst ned (nullsFirst: false)
+// Hämtar granskade barer — ogranskade inskick från /submit visas inte (D6)
+// Slutlig sortering (pris per 40 cl, happy hour) görs i HomeClient
 async function getBars() {
   const { data, error } = await supabase
     .from('bars')
     .select('*')
+    .eq('price_verified', true)
     .order('price_40cl', { ascending: true, nullsFirst: false })
 
   if (error) {
