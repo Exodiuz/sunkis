@@ -19,9 +19,7 @@ const OSM_TYPES: Record<string, string> = { N: 'node', W: 'way', R: 'relation', 
 
 // Stadsdelar i geodata som motsvarar appens områden
 const AREA_ALIASES: Record<string, string> = {
-  norrmalm: 'City',
-  'gamla stan': 'City',
-  city: 'City',
+  city: 'Norrmalm',
   vasastaden: 'Vasastan',
 }
 

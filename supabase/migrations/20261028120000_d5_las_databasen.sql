@@ -1,8 +1,10 @@
 -- ══════════════════════════════════════════════════════
 -- D5 — Lås databasen
 -- Anon får inte längre uppdatera eller radera barer. Röster skrivs bara
--- via vote_price/vote_sunk (security definer) som uppdaterar räknarna atomärt.
+-- via vote_price/vote_sunk (security definer) som uppdaterar räknarna atomärt
+-- och ersätter räknar-triggrarna från 2026-06-06.
 -- Admin skriver via server-routes med service role (går förbi RLS).
+-- Inskick från /submit öppnas igen, men bara som ogranskade rader.
 -- ══════════════════════════════════════════════════════
 
 -- ── bars ──────────────────────────────────────────────
@@ -29,6 +31,15 @@ DROP POLICY IF EXISTS "Alla kan rösta pris"       ON price_votes;
 DROP POLICY IF EXISTS "Alla kan läsa prisröster"  ON price_votes;
 DROP POLICY IF EXISTS "Alla kan rösta sunkfaktor" ON sunk_votes;
 DROP POLICY IF EXISTS "Alla kan läsa sunkröster"  ON sunk_votes;
+
+-- ── räknar-triggrarna från 2026-06-06 ────────────────
+-- vote_price/vote_sunk nedan uppdaterar räknarna själva (och validerar,
+-- spärrar dubbelröster m.m. i senare migrationer). Triggrarna skulle räkna
+-- varje röst en gång till, så de tas bort här.
+DROP TRIGGER IF EXISTS trg_apply_price_vote ON price_votes;
+DROP TRIGGER IF EXISTS trg_apply_sunk_vote  ON sunk_votes;
+DROP FUNCTION IF EXISTS public.apply_price_vote();
+DROP FUNCTION IF EXISTS public.apply_sunk_vote();
 
 -- ── vote_price ────────────────────────────────────────
 -- Sparar en prisröst och räknar upp tumme upp/ner i samma transaktion.

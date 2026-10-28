@@ -1,7 +1,8 @@
 -- ══════════════════════════════════════════════════════
 -- Sunkis — Databasschema för Supabase
 -- Kör detta i: app.supabase.com → SQL Editor → Run
--- Kör därefter alla filer i supabase/migrations/ i namnordning.
+-- Kör därefter alla filer i supabase/migrations/ i namnordning
+-- (de första, 20260606…, kördes direkt i produktion och lades in i efterhand).
 -- Ändringar efter första versionen görs bara som nya migrationer.
 -- ══════════════════════════════════════════════════════
 

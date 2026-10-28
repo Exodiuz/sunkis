@@ -23,7 +23,8 @@ export const DEFAULT_FILTERS: BarFilters = {
   query: '',
 }
 
-export const AREAS = ['Södermalm', 'Kungsholmen', 'Vasastan', 'Östermalm', 'City'] as const
+// Samma namn som i databasen — City heter Norrmalm sedan 2026-06-06 (normalize_area)
+export const AREAS = ['Södermalm', 'Kungsholmen', 'Vasastan', 'Östermalm', 'Norrmalm'] as const
 export const MAX_PRICE_OPTIONS = [30, 40, 50, 60] as const
 export const MIN_SUNK_OPTIONS = [3, 4, 5] as const
 

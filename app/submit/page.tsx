@@ -189,7 +189,7 @@ export default function SubmitPage() {
                 <option value="Kungsholmen">Kungsholmen</option>
                 <option value="Vasastan">Vasastan</option>
                 <option value="Östermalm">Östermalm</option>
-                <option value="City">City / Norrmalm</option>
+                <option value="Norrmalm">Norrmalm / City</option>
               </select>
             </div>
           </div>
