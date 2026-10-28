@@ -75,12 +75,12 @@ export default function BarMap({ bars }: Props) {
         const color = getPinColor(bar)
         const { price, size, isHappyHour } = getCurrentPrice(bar)
 
-        // Anpassad SVG-ikon
+        // Anpassad SVG-ikon i en träffyta på 44 × 44 px
         const icon = L.divIcon({
-          html: createPinIcon(color),
-          iconSize: [28, 36],
-          iconAnchor: [14, 36],
-          popupAnchor: [0, -36],
+          html: `<span style="display:flex;align-items:flex-end;justify-content:center;width:44px;height:44px;">${createPinIcon(color)}</span>`,
+          iconSize: [44, 44],
+          iconAnchor: [22, 44],
+          popupAnchor: [0, -40],
           className: '', // töm klassen för att undvika Leaflet-standard-bakgrund
         })
 
@@ -104,7 +104,9 @@ export default function BarMap({ bars }: Props) {
           </div>
         `
 
-        L.marker([bar.lat, bar.lng], { icon })
+        // title ger nålen ett tillgängligt namn för skärmläsare
+        const label = price ? `${bar.name}, ${price} kr för ${formatSize(size)}` : `${bar.name}, pris saknas`
+        L.marker([bar.lat, bar.lng], { icon, title: label, alt: label, keyboard: true })
           .addTo(map)
           .bindPopup(popupContent)
       })
