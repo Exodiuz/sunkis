@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getDeviceId } from '@/lib/deviceId'
 import { saveOwnSunkVote } from '@/lib/votes'
+import { SUNK_LEVELS } from '@/lib/sunk'
 
 // Alla veckodagar för happy hour-val
 const WEEKDAYS = [
@@ -290,7 +291,9 @@ export default function SubmitPage() {
           {/* Sunkfaktor */}
           <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-3">
             <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Sunkfaktor</h2>
-            <p className="text-xs text-[#A3A199]">Hur sunkigt är det? (1 = ganska trevligt, 5 = riktigt hak)</p>
+            <p className="text-sm text-[#A3A199]">
+              Hur sunkigt är det? <span className="text-[#F1EFE8]">{SUNK_LEVELS[sunkFactor - 1].label}</span>
+            </p>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map(n => (
                 <button
@@ -298,7 +301,7 @@ export default function SubmitPage() {
                   type="button"
                   onClick={() => setSunkFactor(n)}
                   aria-pressed={sunkFactor === n}
-                  aria-label={`Sunkfaktor ${n} av 5`}
+                  aria-label={`Sunkfaktor ${n} av 5: ${SUNK_LEVELS[n - 1].label}`}
                   className={`w-11 h-11 rounded-full border-2 transition-all text-sm font-medium ${
                     sunkFactor >= n
                       ? 'bg-[#EF9F27] border-[#EF9F27] text-[#1a1a18]'

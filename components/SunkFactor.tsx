@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getDeviceId } from '@/lib/deviceId'
+import { SUNK_LEVELS, getSunkLabel } from '@/lib/sunk'
 import { canVoteAgain, isAlreadyVoted, readOwnSunkVote, saveOwnSunkVote, type OwnVote } from '@/lib/votes'
 
 type Props = {
@@ -74,6 +75,9 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
   }
 
   const isInteractive = !!barId && !voted && !alreadyVoted
+  // "Inga röster än" i stället för 0 (B2)
+  const hasVotes = localScore > 0 && (localVotes === undefined || localVotes > 0)
+  const word = getSunkLabel(hovered ?? (hasVotes ? localScore : null))
 
   // Ritar 5 cirklar — fylld, halvfylld eller tom beroende på poäng
   return (
@@ -81,7 +85,11 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
       <div
         className={`flex items-center ${isInteractive ? '' : gap}`}
         role={isInteractive ? 'group' : 'img'}
-        aria-label={isInteractive ? 'Rösta på sunkfaktor' : `Sunkfaktor ${localScore.toFixed(1)} av 5`}
+        aria-label={
+          isInteractive
+            ? 'Rösta på sunkfaktor'
+            : hasVotes ? `Sunkfaktor ${localScore.toFixed(1)} av 5, ${word}` : 'Sunkfaktor: inga röster än'
+        }
       >
         {[1, 2, 3, 4, 5].map((i) => {
           // Beräkna fyllnadsgrad för denna cirkel
@@ -112,20 +120,22 @@ export default function SunkFactor({ score, votes, barId, size = 'md' }: Props) 
               onFocus={() => setHovered(i)}
               onBlur={() => setHovered(null)}
               className="w-11 h-11 flex items-center justify-center rounded-full cursor-pointer transition-transform hover:scale-110"
-              aria-label={`Ge ${i} av 5 i sunkfaktor`}
-              title={`Ge ${i} sunkpoäng`}
+              aria-label={`Ge ${i} av 5 i sunkfaktor: ${SUNK_LEVELS[i - 1].label}`}
+              title={SUNK_LEVELS[i - 1].label}
             >
               {circle}
             </button>
           )
         })}
 
-        {/* Visa poäng som siffra bredvid cirklarna */}
-        {localScore > 0 && (
-          <span className="text-xs text-[#A3A199] ml-1">
-            {localScore.toFixed(1)}
-          </span>
-        )}
+        {/* Poäng och ord bredvid cirklarna, eller "Inga röster än" */}
+        <span className="text-xs text-[#A3A199] ml-1" aria-hidden="true">
+          {hovered
+            ? word
+            : hasVotes
+              ? `${localScore.toFixed(1)}${size === 'md' ? ` · ${word}` : ''}`
+              : 'Inga röster än'}
+        </span>
       </div>
 
       {/* Visa antal röster om angiven */}

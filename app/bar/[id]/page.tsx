@@ -16,6 +16,7 @@ import PriceVote from '@/components/PriceVote'
 import HappyHourBadge from '@/components/HappyHourBadge'
 import OpenStatus from '@/components/OpenStatus'
 import PriceFreshness from '@/components/PriceFreshness'
+import { SUNK_LEVELS } from '@/lib/sunk'
 
 type Props = {
   params: { id: string }
@@ -172,6 +173,17 @@ export default async function BarPage({ params }: Props) {
         <div className="bg-[#2c2c2a] rounded-xl p-4 space-y-3">
           <h2 className="text-sm font-medium text-[#A3A199] uppercase tracking-wide">Sunkfaktor</h2>
           <SunkFactor score={bar.sunk_factor} votes={bar.sunk_votes} barId={bar.id} />
+          {/* Förklaring av skalan (B2) */}
+          <details className="text-sm text-[#A3A199]">
+            <summary className="cursor-pointer min-h-[44px] flex items-center text-[#EF9F27]">Vad betyder sunkfaktor?</summary>
+            <ul className="space-y-1 pt-1">
+              {SUNK_LEVELS.map(level => (
+                <li key={level.score}>
+                  <span className="text-[#F1EFE8]">{level.score} – {level.label}:</span> {level.description}
+                </li>
+              ))}
+            </ul>
+          </details>
         </div>
 
         {/* Stämmer priset? */}
