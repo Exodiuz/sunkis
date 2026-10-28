@@ -8,6 +8,7 @@ import { useEffect, useRef } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { Bar } from '@/lib/supabase'
+import type { LatLng } from '@/lib/geo'
 import { getCurrentPrice, getComparablePrice, formatSize } from '@/lib/happyHour'
 
 // Mörk stil som matchar appens tema
@@ -16,6 +17,8 @@ const STOCKHOLM: [number, number] = [18.0686, 59.3293] // lng, lat
 
 type Props = {
   bars: Bar[]
+  userPosition?: LatLng | null // blå prick (K3)
+  centerRequest?: number       // ökas för att centrera kartan på userPosition
 }
 
 // Väljer pin-färg baserat på pris per 40 cl
@@ -68,10 +71,11 @@ function createPopupHtml(bar: Bar): string {
   `
 }
 
-export default function BarMap({ bars }: Props) {
+export default function BarMap({ bars, userPosition = null, centerRequest = 0 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const markersRef = useRef<maplibregl.Marker[]>([])
+  const userMarkerRef = useRef<maplibregl.Marker | null>(null)
 
   // Skapa kartan en gång
   useEffect(() => {
@@ -118,6 +122,34 @@ export default function BarMap({ bars }: Props) {
           .addTo(map)
       })
   }, [bars])
+
+  // Användarens position som blå prick (K3)
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    if (!userPosition) {
+      userMarkerRef.current?.remove()
+      userMarkerRef.current = null
+      return
+    }
+    if (!userMarkerRef.current) {
+      const dot = document.createElement('div')
+      dot.className = 'sunkis-user-dot'
+      dot.setAttribute('role', 'img')
+      dot.setAttribute('aria-label', 'Din position')
+      userMarkerRef.current = new maplibregl.Marker({ element: dot }).addTo(map)
+    }
+    userMarkerRef.current.setLngLat([userPosition.lng, userPosition.lat])
+  }, [userPosition])
+
+  // Centrera på användaren när knappen trycks och positionen finns
+  useEffect(() => {
+    if (!centerRequest || !userPosition || !mapRef.current) return
+    mapRef.current.easeTo({
+      center: [userPosition.lng, userPosition.lat],
+      zoom: Math.max(mapRef.current.getZoom(), 15),
+    })
+  }, [centerRequest, userPosition])
 
   return (
     <div className="relative w-full h-full">

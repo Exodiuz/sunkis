@@ -3,7 +3,7 @@
 
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import type { Bar } from '@/lib/supabase'
@@ -11,6 +11,7 @@ import { applyFilters, filtersToQueryString, hasActiveFilters, type BarFilters }
 import { SUNK_LEVELS } from '@/lib/sunk'
 import { useNow } from '@/lib/useNow'
 import { useUrlFilters } from '@/lib/useUrlFilters'
+import { useUserLocation } from '@/lib/useUserLocation'
 
 // Ladda kartan dynamiskt (inget SSR — MapLibre kräver window-objekt)
 const BarMap = dynamic(() => import('@/components/BarMap'), {
@@ -44,6 +45,27 @@ export default function MapClient({ bars, renderedAt }: Props) {
   const { filters, resetFilters } = useUrlFilters()
   const visible = useMemo(() => applyFilters(bars, filters, now), [bars, filters, now])
   const active = hasActiveFilters(filters)
+
+  // Egen position (K3) — frågar först när användaren trycker på knappen
+  const location = useUserLocation()
+  const [centerRequest, setCenterRequest] = useState(0)
+  const [wantsCenter, setWantsCenter] = useState(false)
+
+  function centerOnMe() {
+    if (location.position) setCenterRequest(n => n + 1)
+    else {
+      setWantsCenter(true)
+      location.request()
+    }
+  }
+
+  // Centrera så fort positionen kommer om användaren bad om det
+  useEffect(() => {
+    if (wantsCenter && location.position) {
+      setCenterRequest(n => n + 1)
+      setWantsCenter(false)
+    }
+  }, [wantsCenter, location.position])
 
   return (
     <div className="flex flex-col h-screen bg-[#1a1a18]">
@@ -89,7 +111,24 @@ export default function MapClient({ bars, renderedAt }: Props) {
 
       {/* Karta — tar upp resten av skärmen */}
       <div className="flex-1 relative p-2">
-        <BarMap bars={visible} />
+        <BarMap bars={visible} userPosition={location.position} centerRequest={centerRequest} />
+
+        {/* Centrera på mig — nere till höger, ovanför attributionen */}
+        <div className="absolute right-4 bottom-12 z-10 flex flex-col items-end gap-2">
+          {(location.status === 'denied' || location.status === 'unavailable') && (
+            <p role="status" className="max-w-[220px] text-right text-sm bg-[#2c2c2a]/95 border border-[#3a3a38] rounded-lg px-3 py-2 text-[#A3A199]">
+              {location.status === 'denied' ? 'Platsåtkomst är avstängd.' : 'Kunde inte hitta din position.'}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={centerOnMe}
+            className="inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full bg-[#2c2c2a] border border-[#3a3a38] text-sm font-medium text-[#F1EFE8] shadow-lg hover:border-[#BA7517]"
+          >
+            <span aria-hidden="true" className="w-3 h-3 rounded-full bg-[#3b82f6] ring-2 ring-white" />
+            {location.status === 'locating' ? 'Hämtar position…' : 'Centrera på mig'}
+          </button>
+        </div>
       </div>
     </div>
   )
