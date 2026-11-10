@@ -661,8 +661,11 @@ class Webblasare:
             from playwright.sync_api import sync_playwright   # importeras sent: valfritt beroende
             self._pw = sync_playwright().start()
             # CHROMIUM_PATH kan peka ut en redan installerad Chromium
+            # Bakom en företagsproxy läser Chromium inte miljövariablerna själv
+            proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
             self._browser = self._pw.chromium.launch(
-                headless=True, executable_path=os.environ.get("CHROMIUM_PATH") or None)
+                headless=True, executable_path=os.environ.get("CHROMIUM_PATH") or None,
+                proxy={"server": proxy} if proxy else None)
 
     def stang(self) -> None:
         try:
