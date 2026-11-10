@@ -1,0 +1,7 @@
+# Beroenden för scripts/skrapa_krogar.py
+requests>=2.31
+beautifulsoup4>=4.12
+lxml>=5.0
+playwright>=1.45
+# Valfritt: läser PDF-menyer
+pypdf>=4.0
